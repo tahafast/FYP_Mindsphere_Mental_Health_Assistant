@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Calm Ocean Theme - Mental Health App */
+    --background: 210 40% 98%;
+    --foreground: 215 20% 25%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 20% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 20% 25%;
+
+    /* Soft Teal - Primary Action Color */
+    --primary: 174 55% 39%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 174 55% 35%;
+
+    /* Muted Blue-Grey for secondary elements */
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 215 20% 35%;
+
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 174 40% 92%;
+    --accent-foreground: 174 55% 25%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Crisis mode - soft red alert */
+    --crisis: 0 70% 95%;
+    --crisis-foreground: 0 65% 45%;
+    --crisis-border: 0 65% 55%;
+
+    --border: 214 32% 88%;
+    --input: 214 32% 91%;
+    --ring: 174 55% 39%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar - Professional slate */
+    --sidebar-background: 215 25% 97%;
+    --sidebar-foreground: 215 20% 30%;
+    --sidebar-primary: 174 55% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 174 40% 92%;
+    --sidebar-accent-foreground: 174 55% 25%;
+    --sidebar-border: 214 32% 88%;
+    --sidebar-ring: 174 55% 39%;
+
+    /* Chat-specific colors */
+    --chat-user-bg: 214 32% 91%;
+    --chat-user-fg: 215 20% 25%;
+    --chat-ai-bg: 0 0% 100%;
+    --chat-ai-fg: 215 20% 25%;
+    --chat-ai-border: 174 55% 39%;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 215 25% 12%;
+    --foreground: 210 40% 95%;
+
+    --card: 215 25% 15%;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 215 25% 15%;
+    --popover-foreground: 210 40% 95%;
+
+    --primary: 174 55% 45%;
+    --primary-foreground: 215 25% 12%;
+    --primary-hover: 174 55% 50%;
+
+    --secondary: 215 25% 20%;
+    --secondary-foreground: 210 40% 95%;
+
+    --muted: 215 25% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 174 40% 20%;
+    --accent-foreground: 174 55% 75%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --crisis: 0 40% 20%;
+    --crisis-foreground: 0 70% 75%;
+    --crisis-border: 0 65% 55%;
+
+    --border: 215 25% 22%;
+    --input: 215 25% 20%;
+    --ring: 174 55% 45%;
+
+    --sidebar-background: 215 25% 10%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 174 55% 45%;
+    --sidebar-primary-foreground: 215 25% 10%;
+    --sidebar-accent: 174 40% 20%;
+    --sidebar-accent-foreground: 174 55% 75%;
+    --sidebar-border: 215 25% 22%;
+    --sidebar-ring: 174 55% 45%;
+
+    --chat-user-bg: 215 25% 20%;
+    --chat-user-fg: 210 40% 95%;
+    --chat-ai-bg: 215 25% 15%;
+    --chat-ai-fg: 210 40% 95%;
+    --chat-ai-border: 174 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+
+  /* Smooth transitions */
+  button, a, input, textarea {
+    transition: var(--transition-smooth);
+  }
+}
+
+/* Pulse animation for AI thinking */
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Fade in animation */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
+}
