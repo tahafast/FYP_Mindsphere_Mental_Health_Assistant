@@ -6,4 +6,4 @@ start "MindSphere Frontend" cmd /k "cd frontend && npm run dev"
 
 echo MindSphere is running!
 echo Backend: http://localhost:8000
-echo Frontend: http://localhost:5173
+echo Frontend: http://localhost:8080

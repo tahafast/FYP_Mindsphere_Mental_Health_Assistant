@@ -7,16 +7,27 @@ from app.core.config import settings
 from datetime import datetime
 import re
 import logging
+import torch
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Detect GPU/CPU device
+device = 0 if torch.cuda.is_available() else -1  # 0 for GPU, -1 for CPU
+device_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
+logger.info(f"Device set to use {device_name}")
+
 # Initialize Emotion Classifier (Lazy loading recommended for production, but global for now)
 # Using a smaller, faster model for "startup-grade" performance
 try:
-    emotion_classifier = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion", top_k=1)
-    logger.info("Emotion classifier loaded successfully.")
+    emotion_classifier = pipeline(
+        "text-classification", 
+        model="bhadresh-savani/distilbert-base-uncased-emotion", 
+        top_k=1,
+        device=device  # Use GPU if available
+    )
+    logger.info(f"Emotion classifier loaded successfully on {device_name}.")
 except Exception as e:
     logger.error(f"Failed to load emotion classifier: {e}")
     emotion_classifier = None
