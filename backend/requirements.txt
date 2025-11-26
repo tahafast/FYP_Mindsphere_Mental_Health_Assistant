@@ -15,6 +15,7 @@ pypdf>=4.0.1
 tiktoken>=0.5.2
 pymupdf4llm
 pymupdf-layout
+datasets
 flashrank
 rank_bm25
 vaderSentiment
