@@ -57,3 +57,20 @@ frontend/.env
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+
+# Data files
+data/
+*.pdf

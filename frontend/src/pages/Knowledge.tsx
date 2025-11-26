@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload, FileText, Clock, Database } from "lucide-react";
 import { uploadKnowledge, getKnowledgeStats, UploadStatus } from "@/lib/api";
 import { toast } from "sonner";
+import MoodTrendChart from "@/components/MoodTrendChart";
 
 const Knowledge = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -15,6 +16,23 @@ const Knowledge = () => {
     lastUploaded: "Never",
     vectorStatus: "Idle",
   });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const newStats = await getKnowledgeStats();
+      setStats({
+        totalDocuments: newStats.totalDocuments,
+        lastUploaded: newStats.lastUploaded,
+        vectorStatus: newStats.vectorIndexStatus === 'healthy' ? 'Active' : 'Error',
+      });
+    } catch (error) {
+      console.error("Failed to fetch stats", error);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -55,14 +73,8 @@ const Knowledge = () => {
         const timestamp = new Date().toLocaleTimeString();
         setLogs(prev => [...prev, `[${timestamp}] ${status.message}`]);
       });
-      
-      const newStats = await getKnowledgeStats();
-      setStats({
-        totalDocuments: newStats.totalDocuments,
-        lastUploaded: newStats.lastUploaded,
-        vectorStatus: newStats.vectorIndexStatus === 'healthy' ? 'Active' : 'Error',
-      });
-      
+
+      await fetchStats();
       toast.success("Document processed successfully!");
     } catch (error) {
       toast.error("Failed to process document");
@@ -77,10 +89,15 @@ const Knowledge = () => {
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Knowledge Base Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Knowledge Base & Insights</h1>
           <p className="text-muted-foreground mt-1">
-            Upload and manage mental health resources for the AI assistant
+            Manage resources and track emotional trends
           </p>
+        </div>
+
+        {/* Empathy Dashboard (Mood Trend) */}
+        <div className="grid grid-cols-1 gap-4">
+          <MoodTrendChart />
         </div>
 
         {/* Stats Cards */}
@@ -125,7 +142,7 @@ const Knowledge = () => {
         {/* Upload Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Upload Document</CardTitle>
+            <CardTitle>Upload Knowledge</CardTitle>
             <CardDescription>
               Upload PDF files containing mental health information and resources
             </CardDescription>
@@ -138,8 +155,8 @@ const Knowledge = () => {
               onDrop={handleDrop}
               className={`
                 border-2 border-dashed rounded-lg p-12 text-center transition-colors
-                ${isDragging 
-                  ? 'border-primary bg-primary/5' 
+                ${isDragging
+                  ? 'border-primary bg-primary/5'
                   : 'border-border hover:border-primary/50 hover:bg-accent/50'
                 }
                 ${isProcessing ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}

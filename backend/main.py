@@ -15,9 +15,10 @@ app.add_middleware(
 )
 
 # Include Routers
-from app.api.v1.endpoints import chat, knowledge
+from app.api.v1.endpoints import chat, knowledge, user
 app.include_router(chat.router, prefix=f"{settings.API_V1_STR}", tags=["chat"])
 app.include_router(knowledge.router, prefix=f"{settings.API_V1_STR}/knowledge", tags=["knowledge"])
+app.include_router(user.router, prefix=f"{settings.API_V1_STR}/user", tags=["user"])
 
 @app.get("/")
 async def root():

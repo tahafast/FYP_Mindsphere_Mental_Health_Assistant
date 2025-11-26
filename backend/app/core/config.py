@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     
     OPENAI_API_KEY: Optional[str] = None
     MONGODB_URI: Optional[str] = None
+    MONGODB_DB_NAME: str = "mindsphere"
     
     class Config:
         env_file = ".env"

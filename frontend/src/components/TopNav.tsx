@@ -16,7 +16,7 @@ export function TopNav() {
         {/* Left: Brand */}
         <div className="flex items-center gap-2">
           <Brain className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold text-foreground">MindEase</h1>
+          <h1 className="text-xl font-bold text-foreground">MindSphere</h1>
         </div>
 
         {/* Center: Navigation Links */}

@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Send, AlertTriangle } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ThinkingIndicator } from "@/components/ThinkingIndicator";
 import { ChatSidebar } from "@/components/ChatSidebar";
 import { sendMessage, Message, createChatSession } from "@/lib/api";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Chat = () => {
   const [activeSessionId, setActiveSessionId] = useState<string>("1");
@@ -14,12 +15,13 @@ const Chat = () => {
     {
       id: '1',
       role: 'assistant',
-      content: "Hello, I'm MindEase. I'm here to listen and support you. How are you feeling today?",
+      content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
       timestamp: new Date(),
     }
   ]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -43,21 +45,31 @@ const Chat = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsThinking(true);
+    setShowCrisisAlert(false);
 
     try {
-      const response = await sendMessage(input, messages);
-      
+      // Pass user_id (hardcoded "user123" for now)
+      const response = await sendMessage(input, "user123");
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.message,
+        content: response.response, // Note: Backend returns 'response', not 'message'
         timestamp: new Date(),
-        isCrisis: response.isCrisis,
+        isCrisis: response.crisis_detected,
       };
 
       setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      toast.error("Failed to send message. Please try again.");
+
+      if (response.crisis_detected) {
+        setShowCrisisAlert(true);
+        toast.error("Crisis Protocol Activated", {
+          duration: 5000,
+        });
+      }
+
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send message. Please try again.");
     } finally {
       setIsThinking(false);
     }
@@ -78,10 +90,11 @@ const Chat = () => {
         {
           id: '1',
           role: 'assistant',
-          content: "Hello, I'm MindEase. I'm here to listen and support you. How are you feeling today?",
+          content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
           timestamp: new Date(),
         }
       ]);
+      setShowCrisisAlert(false);
       toast.success("New conversation started");
     } catch (error) {
       toast.error("Failed to create new chat");
@@ -95,10 +108,11 @@ const Chat = () => {
       {
         id: '1',
         role: 'assistant',
-        content: "Hello, I'm MindEase. I'm here to listen and support you. How are you feeling today?",
+        content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
         timestamp: new Date(),
       }
     ]);
+    setShowCrisisAlert(false);
   };
 
   return (
@@ -111,12 +125,33 @@ const Chat = () => {
       />
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative">
         {/* Chat Header */}
-        <div className="border-b border-border bg-card p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-foreground">Your Safe Space</h2>
-          <p className="text-sm text-muted-foreground">A confidential conversation</p>
+        <div className="border-b border-border bg-card p-4 shadow-sm flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Your Safe Space</h2>
+            <p className="text-sm text-muted-foreground">A confidential conversation</p>
+          </div>
+          {showCrisisAlert && (
+            <div className="flex items-center gap-2 text-destructive font-bold animate-pulse">
+              <AlertTriangle className="h-5 w-5" />
+              <span>CRISIS RESOURCES DETECTED</span>
+            </div>
+          )}
         </div>
+
+        {/* Crisis Alert Banner */}
+        {showCrisisAlert && (
+          <div className="p-4 bg-destructive/10 border-b border-destructive/20">
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Important Safety Information</AlertTitle>
+              <AlertDescription>
+                If you or someone you know is in immediate danger, please call emergency services (911/112) or a crisis hotline immediately.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
@@ -151,7 +186,7 @@ const Chat = () => {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground text-center">
-              Disclaimer: MindEase is an AI assistant, not a licensed therapist or medical professional. 
+              Disclaimer: MindSphere is an AI assistant, not a licensed therapist or medical professional.
               For emergencies, call 988 or your local crisis line.
             </p>
           </div>
