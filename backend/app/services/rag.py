@@ -85,7 +85,7 @@ Dr. MindSphere:
         """
         try:
             # Fetch all docs (projection to save bandwidth)
-            cursor = self.collection.find({}, {"text": 1, "metadata": 1, "embedding": 0}) # Assuming 'text' field exists, or 'page_content'
+            cursor = self.collection.find({}, {"text": 1, "metadata": 1}) # Assuming 'text' field exists, or 'page_content'
             docs = []
             # We need to reconstruct Document objects
             from langchain.schema import Document
