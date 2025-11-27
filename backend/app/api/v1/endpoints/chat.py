@@ -49,54 +49,70 @@ else:
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     user_input = request.message
+    logger.info(f"📨 Chat request received from user {request.user_id}")
     
     # 1. Crisis Interceptor (Safety Guard)
+    logger.info("🔍 Running safety guard validation...")
     safety_result = await safety_guard.validate_input(user_input)
     if safety_result.get("isCrisis"):
-        logger.warning(f"Crisis detected for user {request.user_id}: {safety_result.get('crisisType')}")
+        logger.warning(f"⚠️ Crisis detected for user {request.user_id}: {safety_result.get('crisisType')}")
         return ChatResponse(
             response=json.dumps(safety_result), # Send the full JSON payload as response string for frontend to parse
             sentiment_score=-1.0,
             sentiment_label="crisis",
             crisis_detected=True
         )
+    logger.info("✅ Safety check passed.")
 
     # 2. Advanced Emotion Analysis (Sentiment Service)
+    logger.info("🧠 Analyzing sentiment...")
     sentiment_result = sentiment_service.analyze_emotion(user_input)
     sentiment_score = sentiment_result["score"]
     label = sentiment_result["label"]
+    logger.info(f"📊 Sentiment: {label} (score: {sentiment_score:.2f})")
     
     # Select Tone Prompt
     tone_section = PROMPT_DEFAULT
     if label in ['fear', 'anger'] or sentiment_score < -0.6:
         tone_section = PROMPT_DIRECTIVE
+        logger.info("🎯 Selected DIRECTIVE tone (fear/anger detected)")
     elif label == 'sadness':
         tone_section = PROMPT_EMPATHETIC
+        logger.info("🎯 Selected EMPATHETIC tone (sadness detected)")
     elif label in ['joy', 'love']:
         tone_section = PROMPT_MOTIVATIONAL
+        logger.info("🎯 Selected MOTIVATIONAL tone (joy/love detected)")
+    else:
+        logger.info("🎯 Selected DEFAULT tone")
     
     # 3. LEAS Logging
     if sentiment_collection is not None:
         try:
+            logger.info("💾 Logging sentiment to MongoDB...")
             sentiment_collection.insert_one({
                 "user_id": request.user_id,
                 "timestamp": datetime.utcnow(),
                 "sentiment_score": sentiment_score,
                 "emotion_label": label,
-                "input_preview": user_input[:50]
+                "input_preview": user_input[:100]
             })
+            logger.info("✅ Sentiment logged successfully.")
         except Exception as e:
-            logger.error(f"Error logging sentiment: {e}")
-
+            logger.error(f"❌ Error logging sentiment: {e}")
+    
     # 4. RAG Generation
+    logger.info("🤖 Generating RAG response...")
     try:
         response_text = await rag_service.generate_response(user_input, tone_section=tone_section)
+        logger.info(f"✅ RAG response generated ({len(response_text)} chars)")
     except Exception as e:
-        logger.error(f"Error generating response: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
+        logger.error(f"❌ Error generating response: {str(e)}")
+        response_text = "I apologize, but I'm having trouble processing your message right now. Please try again."
+    
+    logger.info(f"✅ Chat request completed for user {request.user_id}")
     return ChatResponse(
         response=response_text,
         sentiment_score=sentiment_score,
-        sentiment_label=label
+        sentiment_label=label,
+        crisis_detected=False
     )

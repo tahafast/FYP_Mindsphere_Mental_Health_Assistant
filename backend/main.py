@@ -5,16 +5,34 @@ from app.api.v1.endpoints import chat
 
 from contextlib import asynccontextmanager
 from app.services.sentiment import sentiment_service
+from app.services.rag import rag_service
+import logging
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    logger.info("🚀 Starting application startup...")
+    
     try:
+        logger.info("📊 Loading sentiment analysis model...")
         sentiment_service.load_model()
+        logger.info("✅ Sentiment model loaded successfully.")
     except Exception as e:
-        print(f"Warning: Failed to load sentiment model: {e}")
+        logger.error(f"❌ Failed to load sentiment model: {e}")
+    
+    try:
+        logger.info("🔥 Warming up RAG service (initializing BM25 retriever)...")
+        await rag_service.initialize_bm25()
+        logger.info("✅ RAG service warmed up successfully.")
+    except Exception as e:
+        logger.error(f"❌ Failed to warm up RAG service: {e}")
+    
+    logger.info("✅ Application startup complete.")
     yield
     # Shutdown
+    logger.info("🛑 Application shutdown.")
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
