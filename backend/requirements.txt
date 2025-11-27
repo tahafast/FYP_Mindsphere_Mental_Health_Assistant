@@ -21,3 +21,4 @@ rank_bm25
 vaderSentiment
 transformers
 torch
+certifi

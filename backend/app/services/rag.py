@@ -13,10 +13,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import certifi
+
 class RAGService:
     def __init__(self):
         self.embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY, model="text-embedding-3-small")
-        self.client = MongoClient(settings.MONGODB_URI)
+        self.client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
         self.collection = self.client[settings.MONGODB_DB_NAME]["vectors"]
         
         # 1. Vector Retriever
@@ -46,7 +48,8 @@ class RAGService:
         self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7, openai_api_key=settings.OPENAI_API_KEY)
 
         # 5. Prompt
-        self.prompt = ChatPromptTemplate.from_template("""
+        # 5. Prompt Template
+        self.base_template = """
 ### IDENTITY & LIMITATIONS
 You are MindSphere, an advanced AI mental health support companion. 
 - You are NOT a licensed medical professional, therapist, or psychologist.
@@ -60,10 +63,8 @@ If the user expresses intent of self-harm, suicide, or harm to others (e.g., "I 
 3. PROVIDE emergency resources immediately: "Please reach out to Rescue 1122 or the National Suicide Prevention Lifeline."
 4. DO NOT attempt to resolve the crisis alone.
 
-### THERAPEUTIC TONE (CBT-ALIGNED)
-- **Socratic Questioning:** Instead of giving advice ("You should exercise"), ask guiding questions ("What activities have helped you feel calm in the past?").
-- **Validation First:** Always validate the user's emotion before offering a perspective. "It makes sense that you feel overwhelmed given..."
-- **Non-Judgmental:** Maintain a warm, consistent, and neutral stance.
+### CURRENT MODE & TONE
+{tone_section}
 
 ### RAG CONTEXT USAGE
 - You will be provided with snippets from Reddit threads (Context).
@@ -76,7 +77,8 @@ Peer Context:
 User: {question}
 
 Dr. MindSphere:
-        """)
+"""
+        self.prompt = ChatPromptTemplate.from_template(self.base_template)
 
     async def initialize_bm25(self):
         """
@@ -117,7 +119,7 @@ Dr. MindSphere:
         )
         return ensemble_retriever
 
-    async def generate_response(self, question: str):
+    async def generate_response(self, question: str, tone_section: str = None):
         # 1. Get Hybrid Retriever
         retriever = await self.get_hybrid_retriever()
         
@@ -127,10 +129,23 @@ Dr. MindSphere:
             base_retriever=retriever
         )
         
-        # 3. Chain
+        # 3. Dynamic Prompt
+        if tone_section is None:
+            # Default tone if none provided
+            tone_section = """
+- **Socratic Questioning:** Ask guiding questions.
+- **Validation First:** Validate emotions.
+- **Non-Judgmental:** Maintain a warm, neutral stance.
+"""
+        
+        # Inject tone into template
+        final_prompt_str = self.base_template.replace("{tone_section}", tone_section)
+        prompt = ChatPromptTemplate.from_template(final_prompt_str)
+
+        # 4. Chain
         chain = (
             {"context": compression_retriever, "question": RunnablePassthrough()}
-            | self.prompt
+            | prompt
             | self.llm
             | StrOutputParser()
         )

@@ -10,6 +10,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import certifi
+
 class IngestionService:
     def __init__(self):
         self.headers_to_split_on = [
@@ -31,7 +33,7 @@ class IngestionService:
             logger.warning("OPENAI_API_KEY not found. Embeddings will not be generated.")
 
         if settings.MONGODB_URI:
-            self.client = MongoClient(settings.MONGODB_URI)
+            self.client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
             self.collection = self.client[settings.MONGODB_DB_NAME]["vectors"] # Ensure DB name is correct in settings or hardcoded
         else:
             self.client = None

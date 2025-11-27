@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, ReferenceArea } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMoodHistory, SentimentLog } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
@@ -71,6 +71,13 @@ const MoodTrendChart = () => {
                                     domain={[-1, 1]}
                                     className="text-xs"
                                     tick={{ fill: 'currentColor' }}
+                                    tickFormatter={(value) => {
+                                        if (value >= 0.5) return "Thriving";
+                                        if (value >= 0.1) return "Stable";
+                                        if (value >= -0.1) return "Neutral";
+                                        if (value >= -0.5) return "Anxious";
+                                        return "Distressed";
+                                    }}
                                 />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }}
@@ -79,8 +86,15 @@ const MoodTrendChart = () => {
                                 />
                                 <Legend />
 
+                                {/* Clinical Zones */}
+                                <ReferenceArea y1={0.5} y2={1.0} fill="#dcfce7" fillOpacity={0.2} label="Thriving" />
+                                <ReferenceArea y1={0.1} y2={0.5} fill="#dbeafe" fillOpacity={0.2} label="Stable" />
+                                <ReferenceArea y1={-0.1} y2={0.1} fill="#f3f4f6" fillOpacity={0.2} label="Neutral" />
+                                <ReferenceArea y1={-0.5} y2={-0.1} fill="#ffedd5" fillOpacity={0.2} label="Anxious" />
+                                <ReferenceArea y1={-1.0} y2={-0.5} fill="#fee2e2" fillOpacity={0.2} label="Distressed" />
+
                                 {/* Clinical Baseline Threshold */}
-                                <ReferenceLine y={-0.05} label="Clinical Baseline" stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
+                                <ReferenceLine y={-0.05} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
 
                                 <Line
                                     type="monotone"

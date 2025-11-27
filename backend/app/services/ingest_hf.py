@@ -35,8 +35,10 @@ def pre_flight_check():
     logger.warning("⚠️  IMPORTANT: Ensure your MongoDB Atlas Search Index is configured with 'type': 'knnVector' for the 'embedding' field.")
     logger.info("✅ Pre-flight checks passed.")
 
+import certifi
+
 def get_vector_store():
-    client = MongoClient(MONGO_URI)
+    client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
     collection = client[DB_NAME][COLLECTION_NAME]
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=OPENAI_API_KEY)
     return MongoDBAtlasVectorSearch(

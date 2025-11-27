@@ -7,8 +7,10 @@ from datetime import datetime
 
 router = APIRouter()
 
+import certifi
+
 if settings.MONGODB_URI:
-    client = MongoClient(settings.MONGODB_URI)
+    client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
     sentiment_collection = client[settings.MONGODB_DB_NAME]["user_sentiment_metrics"]
 else:
     sentiment_collection = None
@@ -25,14 +27,18 @@ async def get_mood_history(user_id: str = Query(..., description="The ID of the 
     if sentiment_collection is None:
         return []
     
-    cursor = sentiment_collection.find({"user_id": user_id}).sort("timestamp", 1)
-    logs = []
-    for doc in cursor:
-        logs.append(SentimentLog(
-            user_id=doc["user_id"],
-            timestamp=doc["timestamp"],
-            sentiment_score=doc.get("sentiment_score", 0.0),
-            emotion_label=doc.get("emotion_label", "neutral"),
-            input_preview=doc.get("input_preview")
-        ))
-    return logs
+    try:
+        cursor = sentiment_collection.find({"user_id": user_id}).sort("timestamp", 1)
+        logs = []
+        for doc in cursor:
+            logs.append(SentimentLog(
+                user_id=doc["user_id"],
+                timestamp=doc["timestamp"],
+                sentiment_score=doc.get("sentiment_score", 0.0),
+                emotion_label=doc.get("emotion_label", "neutral"),
+                input_preview=doc.get("input_preview")
+            ))
+        return logs
+    except Exception as e:
+        print(f"Error fetching mood history: {e}")
+        return []

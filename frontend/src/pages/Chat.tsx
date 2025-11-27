@@ -8,6 +8,18 @@ import { ChatSidebar } from "@/components/ChatSidebar";
 import { sendMessage, Message, createChatSession } from "@/lib/api";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Phone, Activity } from "lucide-react";
+
+interface CrisisData {
+  isCrisis: boolean;
+  crisisType: string;
+  message: string;
+  immediate_action: {
+    primary_directive: string;
+    grounding_technique: string;
+    emergency_contacts: { name: string; number: string; action: string }[];
+  };
+}
 
 const Chat = () => {
   const [activeSessionId, setActiveSessionId] = useState<string>("1");
@@ -22,6 +34,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [crisisData, setCrisisData] = useState<CrisisData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -63,6 +76,17 @@ const Chat = () => {
 
       if (response.crisis_detected) {
         setShowCrisisAlert(true);
+        try {
+          // Try to parse the response as JSON if it's a medical emergency
+          const parsed = JSON.parse(response.response);
+          if (parsed.crisisType === 'medical_emergency') {
+            setCrisisData(parsed);
+          }
+        } catch (e) {
+          // Not JSON, standard crisis
+          console.log("Standard crisis detected");
+        }
+
         toast.error("Crisis Protocol Activated", {
           duration: 5000,
         });
@@ -192,7 +216,62 @@ const Chat = () => {
           </div>
         </div>
       </div>
-    </div>
+
+
+      {/* Medical Crisis Overlay */}
+      {
+        crisisData && (
+          <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+            <div className="max-w-md w-full space-y-8">
+              <div className="flex flex-col items-center gap-4 text-destructive">
+                <Activity className="h-16 w-16 animate-pulse" />
+                <h1 className="text-3xl font-bold tracking-tighter">MEDICAL ALERT</h1>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-card border-2 border-destructive/20 p-6 rounded-xl shadow-lg">
+                  <h3 className="text-xl font-semibold mb-2">Primary Directive</h3>
+                  <p className="text-lg leading-relaxed font-medium">
+                    {crisisData.immediate_action.primary_directive}
+                  </p>
+                </div>
+
+                <div className="bg-primary/5 p-8 rounded-full w-64 h-64 mx-auto flex items-center justify-center animate-pulse duration-[4000ms]">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Grounding</p>
+                    <p className="font-medium text-primary">
+                      {crisisData.immediate_action.grounding_technique}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4">
+                {crisisData.immediate_action.emergency_contacts.map((contact, idx) => (
+                  <Button
+                    key={idx}
+                    variant="destructive"
+                    size="lg"
+                    className="w-full h-16 text-xl font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
+                    onClick={() => window.location.href = `tel:${contact.number}`}
+                  >
+                    <Phone className="h-6 w-6" />
+                    {contact.action}: {contact.number}
+                  </Button>
+                ))}
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => setCrisisData(null)}
+                >
+                  I am safe now (Dismiss)
+                </Button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    </div >
   );
 };
 
