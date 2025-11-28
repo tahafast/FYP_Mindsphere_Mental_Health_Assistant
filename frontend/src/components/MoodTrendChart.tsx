@@ -69,14 +69,16 @@ const MoodTrendChart = () => {
                                 />
                                 <YAxis
                                     domain={[-1, 1]}
+                                    ticks={[-1, -0.5, 0, 0.5, 1]}
                                     className="text-xs"
                                     tick={{ fill: 'currentColor' }}
                                     tickFormatter={(value) => {
-                                        if (value >= 0.5) return "Thriving";
-                                        if (value >= 0.1) return "Stable";
-                                        if (value >= -0.1) return "Neutral";
-                                        if (value >= -0.5) return "Anxious";
-                                        return "Distressed";
+                                        if (value === 1) return "Thriving";
+                                        if (value === 0.5) return "Stable";
+                                        if (value === 0) return "Neutral";
+                                        if (value === -0.5) return "Anxious";
+                                        if (value === -1) return "Distressed";
+                                        return "";
                                     }}
                                 />
                                 <Tooltip
