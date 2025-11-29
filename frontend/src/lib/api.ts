@@ -17,6 +17,7 @@ export interface ChatSession {
 
 export interface ChatRequest {
   user_id: string;
+  session_id: string;
   message: string;
 }
 
@@ -58,11 +59,11 @@ const fetchApi = async <T>(endpoint: string, options?: RequestInit): Promise<T> 
 };
 
 // Chat API
-export const sendMessage = async (message: string, userId: string): Promise<ChatResponse> => {
+export const sendMessage = async (message: string, userId: string, sessionId: string): Promise<ChatResponse> => {
   return fetchApi<ChatResponse>('/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: userId, message }),
+    body: JSON.stringify({ user_id: userId, session_id: sessionId, message }),
   });
 };
 
@@ -103,22 +104,41 @@ export const getKnowledgeStats = async (): Promise<KnowledgeStats> => {
   return fetchApi<KnowledgeStats>('/knowledge/stats');
 };
 
-// Chat Session APIs (Mock for now)
-export const getChatSessions = async (): Promise<ChatSession[]> => {
-  return [
-    { id: "1", name: "Current Session", timestamp: new Date() }
-  ];
+// Chat Session APIs
+export const getChatSessions = async (userId: string): Promise<ChatSession[]> => {
+  // Map backend fields to frontend interface
+  const sessions = await fetchApi<any[]>(`/sessions?user_id=${userId}`);
+  return sessions.map(s => ({
+    id: s.session_id,
+    name: s.title,
+    timestamp: new Date(s.created_at)
+  }));
 };
 
-export const createChatSession = async (): Promise<ChatSession> => {
+export const createChatSession = async (userId: string): Promise<ChatSession> => {
+  const session = await fetchApi<any>(`/sessions?user_id=${userId}`, {
+    method: 'POST'
+  });
   return {
-    id: Date.now().toString(),
-    name: "New Conversation",
-    timestamp: new Date(),
+    id: session.session_id,
+    name: session.title,
+    timestamp: new Date(session.created_at)
   };
 };
 
+export const deleteSession = async (sessionId: string): Promise<void> => {
+  await fetchApi(`/sessions/${sessionId}`, {
+    method: 'DELETE'
+  });
+};
+
 export const getChatMessages = async (sessionId: string): Promise<Message[]> => {
-  return [];
+  const messages = await fetchApi<any[]>(`/sessions/${sessionId}/messages`);
+  return messages.map(m => ({
+    id: m.id,
+    role: m.role,
+    content: m.content,
+    timestamp: new Date(m.timestamp)
+  }));
 };
 

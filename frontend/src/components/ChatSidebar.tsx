@@ -1,31 +1,46 @@
-import { Plus, MessageSquare, Menu } from "lucide-react";
+import { Plus, MessageSquare, Menu, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-
-interface ChatSession {
-  id: string;
-  name: string;
-  timestamp: Date;
-}
-
-// Mock chat sessions - will be fetched from backend later
-const mockChatSessions: ChatSession[] = [
-  { id: "1", name: "Understanding Anxiety", timestamp: new Date() },
-  { id: "2", name: "Daily Check-in", timestamp: new Date(Date.now() - 86400000) },
-  { id: "3", name: "Session 1", timestamp: new Date(Date.now() - 172800000) },
-  { id: "4", name: "Coping Strategies", timestamp: new Date(Date.now() - 259200000) },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getChatSessions, deleteSession, ChatSession } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ChatSidebarContentProps {
   activeSessionId?: string;
   onNewChat: () => void;
   onSelectSession: (id: string) => void;
+  userId: string;
 }
 
-function ChatSidebarContent({ activeSessionId, onNewChat, onSelectSession }: ChatSidebarContentProps) {
+function ChatSidebarContent({ activeSessionId, onNewChat, onSelectSession, userId }: ChatSidebarContentProps) {
+  const queryClient = useQueryClient();
+
+  const { data: sessions = [], isLoading } = useQuery({
+    queryKey: ['chatSessions', userId],
+    queryFn: () => getChatSessions(userId),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteSession,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+      toast.success("Chat deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete chat");
+    }
+  });
+
+  const handleDelete = (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this chat?")) {
+      deleteMutation.mutate(sessionId);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-sidebar">
       {/* New Chat Button */}
@@ -48,24 +63,38 @@ function ChatSidebarContent({ activeSessionId, onNewChat, onSelectSession }: Cha
         </div>
         <ScrollArea className="h-[calc(100%-3rem)]">
           <div className="px-2 pb-4 space-y-1">
-            {mockChatSessions.map((session) => (
-              <button
-                key={session.id}
-                onClick={() => onSelectSession(session.id)}
-                className={cn(
-                  "w-full text-left px-3 py-2.5 rounded-md text-sm transition-colors",
-                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  activeSessionId === session.id
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary"
-                    : "text-sidebar-foreground"
-                )}
-              >
-                <div className="flex items-start gap-2">
-                  <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span className="truncate">{session.name}</span>
+            {isLoading ? (
+              <div className="px-4 py-2 text-sm text-muted-foreground">Loading...</div>
+            ) : sessions.length === 0 ? (
+              <div className="px-4 py-2 text-sm text-muted-foreground">No recent chats</div>
+            ) : (
+              sessions.map((session) => (
+                <div
+                  key={session.id}
+                  onClick={() => onSelectSession(session.id)}
+                  className={cn(
+                    "group relative w-full text-left px-3 py-2.5 rounded-md text-sm transition-colors cursor-pointer flex items-center justify-between",
+                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    activeSessionId === session.id
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary"
+                      : "text-sidebar-foreground"
+                  )}
+                >
+                  <div className="flex items-start gap-2 overflow-hidden">
+                    <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span className="truncate">{session.name}</span>
+                  </div>
+
+                  <button
+                    onClick={(e) => handleDelete(e, session.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 hover:text-destructive rounded"
+                    title="Delete Chat"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
-              </button>
-            ))}
+              ))
+            )}
           </div>
         </ScrollArea>
       </div>
@@ -77,9 +106,10 @@ interface ChatSidebarProps {
   activeSessionId?: string;
   onNewChat: () => void;
   onSelectSession: (id: string) => void;
+  userId?: string; // Optional to keep backward compatibility if needed, but we'll pass it
 }
 
-export function ChatSidebar({ activeSessionId, onNewChat, onSelectSession }: ChatSidebarProps) {
+export function ChatSidebar({ activeSessionId, onNewChat, onSelectSession, userId = "user123" }: ChatSidebarProps) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
@@ -100,6 +130,7 @@ export function ChatSidebar({ activeSessionId, onNewChat, onSelectSession }: Cha
             activeSessionId={activeSessionId}
             onNewChat={onNewChat}
             onSelectSession={onSelectSession}
+            userId={userId}
           />
         </SheetContent>
       </Sheet>
@@ -112,6 +143,7 @@ export function ChatSidebar({ activeSessionId, onNewChat, onSelectSession }: Cha
         activeSessionId={activeSessionId}
         onNewChat={onNewChat}
         onSelectSession={onSelectSession}
+        userId={userId}
       />
     </aside>
   );

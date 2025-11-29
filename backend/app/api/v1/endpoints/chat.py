@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from app.services.rag import rag_service
 from transformers import pipeline
@@ -22,12 +22,14 @@ from app.services.sentiment import sentiment_service
 from app.core.prompts import PROMPT_DIRECTIVE, PROMPT_EMPATHETIC, PROMPT_MOTIVATIONAL, PROMPT_DEFAULT
 from app.services.safety_guard import safety_guard
 import json
+from app.api.v1.endpoints.sessions import generate_session_title
 
 # Crisis Keywords Regex (Removed, handled by SafetyGuard)
 # CRISIS_REGEX = ...
 
 class ChatRequest(BaseModel):
     user_id: str
+    session_id: str
     message: str
 
 class ChatResponse(BaseModel):
@@ -38,19 +40,31 @@ class ChatResponse(BaseModel):
 
 import certifi
 
-# MongoDB for Sentiment Metrics
+# MongoDB Connections
 if settings.MONGODB_URI:
     client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
-    sentiment_collection = client[settings.MONGODB_DB_NAME]["user_sentiment_metrics"]
+    db = client[settings.MONGODB_DB_NAME]
+    sentiment_collection = db["user_sentiment_metrics"]
+    chat_histories_collection = db["chat_histories"]
 else:
     sentiment_collection = None
-    logger.warning("MONGODB_URI not found. Sentiment logging disabled.")
+    chat_histories_collection = None
+    logger.warning("MONGODB_URI not found. Database features disabled.")
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     user_input = request.message
-    logger.info(f"📨 Chat request received from user {request.user_id}")
+    session_id = request.session_id
+    logger.info(f"📨 Chat request received from user {request.user_id} for session {session_id}")
     
+    # 0. Background Title Generation (if first message)
+    if chat_histories_collection is not None:
+        # Check if this session has any messages yet
+        msg_count = chat_histories_collection.count_documents({"session_id": session_id})
+        if msg_count == 0:
+            logger.info(f"🆕 First message in session {session_id}. Triggering auto-title...")
+            background_tasks.add_task(generate_session_title, session_id, user_input)
+
     # 1. Crisis Interceptor (Safety Guard)
     logger.info("🔍 Running safety guard validation...")
     safety_result = await safety_guard.validate_input(user_input)
@@ -70,6 +84,18 @@ async def chat(request: ChatRequest):
     sentiment_score = sentiment_result["score"]
     label = sentiment_result["label"]
     logger.info(f"📊 Sentiment: {label} (score: {sentiment_score:.2f})")
+
+    # 2.1 Fear-Based Crisis Trigger
+    # If sentiment is FEAR and score is very low (high confidence fear), force safety protocol
+    if label == 'fear' and sentiment_score < -0.8:
+        logger.warning(f"⚠️ High Fear detected ({sentiment_score}). Triggering Safety Guard.")
+        safety_result = safety_guard.get_crisis_response()
+        return ChatResponse(
+            response=json.dumps(safety_result),
+            sentiment_score=sentiment_score,
+            sentiment_label=label,
+            crisis_detected=True
+        )
     
     # Select Tone Prompt
     tone_section = PROMPT_DEFAULT
@@ -91,6 +117,7 @@ async def chat(request: ChatRequest):
             logger.info("💾 Logging sentiment to MongoDB...")
             sentiment_collection.insert_one({
                 "user_id": request.user_id,
+                "session_id": session_id,
                 "timestamp": datetime.utcnow(),
                 "sentiment_score": sentiment_score,
                 "emotion_label": label,
@@ -109,6 +136,27 @@ async def chat(request: ChatRequest):
         logger.error(f"❌ Error generating response: {str(e)}")
         response_text = "I apologize, but I'm having trouble processing your message right now. Please try again."
     
+    # 5. Save Chat History
+    if chat_histories_collection is not None:
+        try:
+            chat_histories_collection.insert_one({
+                "session_id": session_id,
+                "user_id": request.user_id,
+                "role": "user",
+                "content": user_input,
+                "timestamp": datetime.utcnow()
+            })
+            chat_histories_collection.insert_one({
+                "session_id": session_id,
+                "user_id": request.user_id,
+                "role": "assistant",
+                "content": response_text,
+                "timestamp": datetime.utcnow()
+            })
+            logger.info(f"💾 Saved chat history for session {session_id}")
+        except Exception as e:
+            logger.error(f"❌ Error saving chat history: {e}")
+
     logger.info(f"✅ Chat request completed for user {request.user_id}")
     return ChatResponse(
         response=response_text,

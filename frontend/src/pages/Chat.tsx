@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, AlertTriangle } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ThinkingIndicator } from "@/components/ThinkingIndicator";
 import { ChatSidebar } from "@/components/ChatSidebar";
-import { sendMessage, Message, createChatSession } from "@/lib/api";
+import { sendMessage, Message, createChatSession, getChatMessages } from "@/lib/api";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Phone, Activity } from "lucide-react";
@@ -22,7 +23,7 @@ interface CrisisData {
 }
 
 const Chat = () => {
-  const [activeSessionId, setActiveSessionId] = useState<string>("1");
+  const [activeSessionId, setActiveSessionId] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -36,6 +37,8 @@ const Chat = () => {
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisData, setCrisisData] = useState<CrisisData | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const USER_ID = "user123"; // Hardcoded for now
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,8 +48,25 @@ const Chat = () => {
     scrollToBottom();
   }, [messages, isThinking]);
 
+  // Auto-init session if none exists
+  useEffect(() => {
+    const initSession = async () => {
+      if (!activeSessionId) {
+        try {
+          const newSession = await createChatSession(USER_ID);
+          setActiveSessionId(newSession.id);
+          // Refresh sidebar
+          queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+        } catch (error) {
+          console.error("Failed to create initial session", error);
+        }
+      }
+    };
+    initSession();
+  }, [activeSessionId, queryClient]);
+
   const handleSend = async () => {
-    if (!input.trim() || isThinking) return;
+    if (!input.trim() || isThinking || !activeSessionId) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -55,41 +75,65 @@ const Chat = () => {
       timestamp: new Date(),
     };
 
+    // Check if this is the first user message to trigger title refresh later
+    const isFirstMessage = messages.length === 1 && messages[0].role === 'assistant';
+
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsThinking(true);
     setShowCrisisAlert(false);
 
     try {
-      // Pass user_id (hardcoded "user123" for now)
-      const response = await sendMessage(input, "user123");
+      // Pass user_id and session_id
+      const response = await sendMessage(input, USER_ID, activeSessionId);
 
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.response, // Note: Backend returns 'response', not 'message'
-        timestamp: new Date(),
-        isCrisis: response.crisis_detected,
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
+      // If it was the first message, refresh the sidebar after a short delay to show the new title
+      if (isFirstMessage) {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+        }, 2000); // Wait for background title generation
+      }
 
       if (response.crisis_detected) {
         setShowCrisisAlert(true);
+        let sanitizedContent = "⚠️ Crisis Protocol Activated. Resources provided.";
+
         try {
           // Try to parse the response as JSON if it's a medical emergency
           const parsed = JSON.parse(response.response);
           if (parsed.crisisType === 'medical_emergency') {
             setCrisisData(parsed);
+            // We don't want to show the raw JSON in the chat
+            // The overlay will handle the detailed information
           }
         } catch (e) {
-          // Not JSON, standard crisis
-          console.log("Standard crisis detected");
+          // Not JSON, standard crisis or parsing failed
+          console.log("Standard crisis detected or parsing error");
+          sanitizedContent = response.response; // Fallback to original if not JSON
         }
+
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: sanitizedContent,
+          timestamp: new Date(),
+          isCrisis: true,
+        };
+        setMessages(prev => [...prev, aiMessage]);
 
         toast.error("Crisis Protocol Activated", {
           duration: 5000,
         });
+      } else {
+        // Standard response
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.response,
+          timestamp: new Date(),
+          isCrisis: false,
+        };
+        setMessages(prev => [...prev, aiMessage]);
       }
 
     } catch (error: any) {
@@ -108,7 +152,7 @@ const Chat = () => {
 
   const handleNewChat = async () => {
     try {
-      const newSession = await createChatSession();
+      const newSession = await createChatSession(USER_ID);
       setActiveSessionId(newSession.id);
       setMessages([
         {
@@ -119,23 +163,33 @@ const Chat = () => {
         }
       ]);
       setShowCrisisAlert(false);
+      queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
       toast.success("New conversation started");
     } catch (error) {
       toast.error("Failed to create new chat");
     }
   };
 
-  const handleSelectSession = (sessionId: string) => {
+  const handleSelectSession = async (sessionId: string) => {
     setActiveSessionId(sessionId);
-    // In a real app, fetch messages for this session
-    setMessages([
-      {
-        id: '1',
-        role: 'assistant',
-        content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
-        timestamp: new Date(),
+    try {
+      const history = await getChatMessages(sessionId);
+      if (history.length > 0) {
+        setMessages(history);
+      } else {
+        setMessages([
+          {
+            id: '1',
+            role: 'assistant',
+            content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
+            timestamp: new Date(),
+          }
+        ]);
       }
-    ]);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to load chat history");
+    }
     setShowCrisisAlert(false);
   };
 
@@ -237,9 +291,9 @@ const Chat = () => {
                 </div>
 
                 <div className="bg-primary/5 p-8 rounded-full w-64 h-64 mx-auto flex items-center justify-center animate-pulse duration-[4000ms]">
-                  <div className="text-center">
+                  <div className="text-center flex flex-col items-center justify-center h-full">
                     <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Grounding</p>
-                    <p className="font-medium text-primary">
+                    <p className="font-semibold text-lg leading-relaxed text-primary">
                       {crisisData.immediate_action.grounding_technique}
                     </p>
                   </div>
