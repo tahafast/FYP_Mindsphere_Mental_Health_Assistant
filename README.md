@@ -1,126 +1,142 @@
+# MindSphere: Mental Health Assistant Leveraging Generative AI
 
-# RAG Based Chat-bot using Langchain and MongoDB Atlas
-This starter template implements a Retrieval-Augmented Generation (RAG) chatbot using LangChain and MongoDB Atlas. RAG combines AI language generation with knowledge retrieval for more informative responses. LangChain simplifies building the chatbot logic, while MongoDB Atlas' Vector database capability provides a powerful platform for storing and searching the knowledge base that fuels the chatbot's responses.
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-0.1-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
 
-## Setup 
-### Prerequisites
+## Abstract
 
-Before you begin, make sure you have the following ready:
+MindSphere is an advanced mental health assistant designed to provide empathetic, 24/7 support using Generative AI. It combines a **First Responder Protocol** for immediate crisis intervention with a **Longitudinal Emotional Alignment Score (LEAS)** to track user well-being over time. The system utilizes a **Hybrid RAG architecture with Reranking** to deliver clinically grounded and context-aware responses, bridging the gap between automated support and professional care.
 
-- **MongoDB Atlas URI**: Setup your account if you don't already have one ([Create Account](https://www.mongodb.com/docs/guides/atlas/account/))
+---
+
+## Key Features
+
+### 🛡️ First Responder Protocol
+Located in `backend/app/services/safety_guard.py`, this critical safety feature uses optimized Regex patterns to instantly detect medical emergencies and self-harm intent. It bypasses the LLM to deliver a deterministic, structured crisis response, prioritizing user safety above all else.
+
+### 📈 Longitudinal Emotional Alignment Score (LEAS)
+Found in `backend/app/services/sentiment.py` and visualized in `frontend/src/components/MoodTrendChart.tsx`, LEAS is a proprietary metric derived from a distilled BERT emotion classification model. It quantifies emotional states on a scale (from -1.0 Distressed to +1.0 Thriving) and plots them against a clinical baseline to visualize progress over time.
+
+### 🧠 Hybrid RAG with Reranking
+Implemented in `backend/app/services/rag.py`, the retrieval engine combines **MongoDB Atlas Vector Search** (semantic) with **BM25** (keyword) using an `EnsembleRetriever`. Results are then refined by a **FlashRank** reranker to ensure the Large Language Model (LLM) receives the most relevant professional counseling context.
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    User([User]) <--> UI[React Frontend\n(Vite + Shadcn/UI)]
+    UI <--> API[FastAPI Backend]
     
-- **OpenAI API Key** (https://platform.openai.com/api-keys)
+    subgraph "Safety Layer"
+        API --> Guard{Safety Guard\n(Regex Patterns)}
+        Guard -- "Crisis Detected" --> Crisis[Crisis Response\n(Immediate Action)]
+        Guard -- "Safe" --> RAG[RAG Orchestrator]
+    end
+    
+    subgraph "Intelligence Engine"
+        RAG --> VectorDB[(MongoDB Atlas\nVector Store)]
+        RAG --> BM25[BM25 Retriever]
+        VectorDB & BM25 --> Ensemble[Ensemble Retriever]
+        Ensemble --> Rerank[FlashRank Reranker]
+        Rerank --> LLM[OpenAI GPT-4o]
+    end
+    
+    subgraph "Analytics"
+        API --> Sentiment[Sentiment Engine\n(DistilBERT)]
+        Sentiment --> LEAS[LEAS Score]
+        LEAS --> DB[(MongoDB\nLogs)]
+    end
+    
+    Crisis --> UI
+    LLM --> UI
+```
 
+---
 
+## Installation & Setup
 
-## Steps to Deploy 
-Follow the below-mentioned steps to deploy the app on Vercel.
+### Prerequisites
+- **Node.js** (v18+)
+- **Python** (v3.10+)
+- **MongoDB Atlas** Cluster (Vector Search enabled)
 
-#### Step 1: Click below to navigate to the deployment page
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmongodb-partners%2FMongoDB-RAG-Vercel&env=OPENAI_API_KEY&demo-title=RAG%20with%20MongoDB%20Atlas%20and%20OpenAI&demo-url=https%3A%2F%2Fmonogodb-rag.vercel.app%2F&integration-ids=oac_jnzmjqM10gllKmSrG0SGrHOH)
+### 1. Backend Setup
+Navigate to the backend directory and install dependencies:
 
-#### Step 2: Add Environment Variables
+```bash
+cd backend
+python -m venv venv
+# Windows
+.\venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
 
-Populate the values of the ENV variables mentioned below
+pip install -r requirements.txt
+```
 
-````
-OPENAI_API_KEY = "<YOUR_OPENAI_KEY>"              # API Key copied from the OpenAI portal
-MONGODB_URI = "<YOUR_MONGODB_URI>"                # Connection URI to MongoDB Instance (This should be automatically created after MongoDB Atlas integration)
-````
+Create a `.env` file in the `backend/` directory:
+```env
+OPENAI_API_KEY=your_key_here
+MONGODB_URI=your_mongodb_atlas_uri
+MONGODB_DB_NAME=mindsphere
+```
 
-#### Step 3: Deploy
-Once you have updated the above values, go ahead and click deploy to deploy the app. Wait for the app to be deployed and start serving traffic.
+### 2. Frontend Setup
+Navigate to the frontend directory and install dependencies:
 
+```bash
+cd frontend
+npm install
+```
 
-#### Step 4: Upload PDF files to create chunks
-Head to the `Train` tab and upload a PDF document. 
+Start the development server:
+```bash
+npm run dev
+```
 
-If everything is deployed correctly, your document should start uploading to your cluster under the `chatter > training_data` collection.
+### 3. Data Ingestion
+Run the ingestion script to populate the Vector Database with Hugging Face datasets:
 
-Your data should now start appearing as below in the collection.
+```bash
+# From the backend directory
+python -m app.services.ingest_hf
+```
 
-![image](https://github.com/utsavMongoDB/MongoDB-RAG-NextJS/assets/114057324/316af753-8f7b-492f-b51a-c23c109a3fac)
+---
 
+## User Interface
 
+### 📊 Dashboard & Analytics
+*Real-time tracking of emotional trends using the LEAS metric.*
 
-#### Step 5: Create Vector Index on Atlas
-Now for the RAG (QnA) to work, you need to create a Vector Search Index on Atlas so the vector data can be fetched and served to LLMs.
+![Dashboard UI Placeholder](https://placehold.co/800x450?text=Dashboard+UI+Screenshot)
 
-Create a search index as below.
+### 💬 AI Chat Interface
+*Empathetic, context-aware conversations powered by Hybrid RAG.*
 
-- Let’s head over to our MongoDB Atlas user interface to create our Vector Search Index. First, click on the “Search” tab and then on “Create Search Index.” You’ll be taken to this page (shown below). Please click on “JSON Editor.”
- ![image](https://github.com/utsavMongoDB/MongoDB-RAG-NextJS/assets/114057324/b41a09a8-9875-4e5d-9549-e62652389d33)
+![Chat UI Placeholder](https://placehold.co/800x450?text=Chat+UI+Screenshot)
 
-- Next input the values as shown in the below image and create the Vector.
-    ```
-    {
-      "fields": [
-        {
-          "numDimensions": 1536,
-          "path": "text_embedding",
-          "similarity": "cosine",
-          "type": "vector"
-        }
-      ]
-    }
-    ```
-  ![image](https://github.com/utsavMongoDB/MongoDB-RAG-NextJS/assets/114057324/ea1c8fa9-d391-40e6-b838-7a49fdf6bbd7)
+---
 
-- You should start seeing a vector index getting created. You should get an email once index creation is completed.
-  ![image](https://github.com/utsavMongoDB/MongoDB-RAG-NextJS/assets/114057324/c1842069-4080-4251-8269-08d9398e09aa)
+## Tech Stack
 
-- Once completed, head to the QnA section to start asking questions based on your trained data, and you should get the desired response.
+**Frontend:**
+- React, Vite, TypeScript
+- TailwindCSS, Shadcn/UI
+- Recharts (Data Visualization)
 
-  ![image](https://github.com/utsavMongoDB/MongoDB-RAG-NextJS/assets/114057324/c76c8c19-e18a-46b1-834a-9a6bda7fec99)
+**Backend:**
+- FastAPI, Uvicorn
+- LangChain, OpenAI
+- PyMongo, Motor
+- Transformers, Torch
 
-
-
-## Reference Architechture 
-
-![image](https://github.com/mongodb-partners/MongoDB-RAG-Vercel/assets/114057324/3a4b863e-cea3-4d89-a6f5-24a4ee44cfd4)
-
-
-This architecture depicts a Retrieval-Augmented Generation (RAG) chatbot system built with LangChain, OpenAI, and MongoDB Atlas Vector Search. Let's break down its key players:
-
-- **PDF File**: This serves as the knowledge base, containing the information the chatbot draws from to answer questions. The RAG system extracts and processes this data to fuel the chatbot's responses.
-- **Text Chunks**: These are meticulously crafted segments extracted from the PDF. By dividing the document into smaller, targeted pieces, the system can efficiently search and retrieve the most relevant information for specific user queries.
-- **LangChain**: This acts as the central control unit, coordinating the flow of information between the chatbot and the other components. It preprocesses user queries, selects the most appropriate text chunks based on relevance, and feeds them to OpenAI for response generation.
-- **Query Prompt**: This signifies the user's question or input that the chatbot needs to respond to.
-- **Actor**: This component acts as the trigger, initiating the retrieval and generation process based on the user query. It instructs LangChain and OpenAI to work together to retrieve relevant information and formulate a response.
-- **OpenAI Embeddings**: OpenAI, a powerful large language model (LLM), takes centre stage in response generation. By processing the retrieved text chunks (potentially converted into numerical representations or embeddings), OpenAI crafts a response that aligns with the user's query and leverages the retrieved knowledge.
-- **MongoDB Atlas Vector Store**: This specialized database is optimized for storing and searching vector embeddings. It efficiently retrieves the most relevant text chunks from the knowledge base based on the query prompt's embedding. These retrieved knowledge nuggets are then fed to OpenAI to inform its response generation.
-
-
-This RAG-based architecture seamlessly integrates retrieval and generation. It retrieves the most relevant knowledge from the database and utilizes OpenAI's language processing capabilities to deliver informative and insightful answers to user queries.
-
-
-## Implementation 
-
-The below components are used to build up the bot, which can retrieve the required information from the vector store, feed it to the chain and stream responses to the client.
-
-#### LLM Model 
-
-        const model = new ChatOpenAI({
-            temperature: 0.8,
-            streaming: true,
-            callbacks: [handlers],
-        });
-
-
-#### Vector Store
-
-        const retriever = vectorStore().asRetriever({ 
-            "searchType": "mmr", 
-            "searchKwargs": { "fetchK": 10, "lambda": 0.25 } 
-        })
-
-#### Chain
-
-       const conversationChain = ConversationalRetrievalQAChain.fromLLM(model, retriever, {
-            memory: new BufferMemory({
-              memoryKey: "chat_history",
-            }),
-          })
-        conversationChain.invoke({
-            "question": question
-        })
+**AI & Data:**
+- MongoDB Atlas Vector Search
+- FlashRank (Reranking)
+- DistilBERT (Sentiment Analysis)
