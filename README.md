@@ -29,17 +29,17 @@ Implemented in `backend/app/services/rag.py`, the retrieval engine combines **Mo
 
 ```mermaid
 flowchart TD
-    User([User]) <--> UI[React Frontend\n(Vite + Shadcn/UI)]
+    User([User]) <--> UI["React Frontend\n(Vite + Shadcn/UI)"]
     UI <--> API[FastAPI Backend]
     
     subgraph "Safety Layer"
-        API --> Guard{Safety Guard\n(Regex Patterns)}
-        Guard -- "Crisis Detected" --> Crisis[Crisis Response\n(Immediate Action)]
+        API --> Guard{"Safety Guard\n(Regex Patterns)"}
+        Guard -- "Crisis Detected" --> Crisis["Crisis Response\n(Immediate Action)"]
         Guard -- "Safe" --> RAG[RAG Orchestrator]
     end
     
     subgraph "Intelligence Engine"
-        RAG --> VectorDB[(MongoDB Atlas\nVector Store)]
+        RAG --> VectorDB[("MongoDB Atlas\nVector Store")]
         RAG --> BM25[BM25 Retriever]
         VectorDB & BM25 --> Ensemble[Ensemble Retriever]
         Ensemble --> Rerank[FlashRank Reranker]
@@ -47,9 +47,9 @@ flowchart TD
     end
     
     subgraph "Analytics"
-        API --> Sentiment[Sentiment Engine\n(DistilBERT)]
+        API --> Sentiment["Sentiment Engine\n(DistilBERT)"]
         Sentiment --> LEAS[LEAS Score]
-        LEAS --> DB[(MongoDB\nLogs)]
+        LEAS --> DB[("MongoDB\nLogs")]
     end
     
     Crisis --> UI
