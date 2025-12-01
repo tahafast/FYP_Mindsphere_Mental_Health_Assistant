@@ -8,15 +8,15 @@ export function TopNav() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-card shadow-sm">
-      <div className="flex items-center justify-between h-full px-6">
+      <div className="relative flex items-center justify-between h-full px-6">
         {/* Brand */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 z-10">
           <Brain className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-bold text-foreground tracking-tight">MindSphere</h1>
         </div>
 
         {/* Center Nav */}
-        <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
           <NavLink
             to="/"
             className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-sm"
@@ -36,13 +36,15 @@ export function TopNav() {
         </div>
 
         {/* Right Actions */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        >
-          {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2 z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
     </nav>
   );

@@ -2,14 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, AlertTriangle } from "lucide-react";
+import { Send, AlertTriangle, Menu, Brain, SquarePen, Phone, Activity } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ThinkingIndicator } from "@/components/ThinkingIndicator";
-import { ChatSidebar } from "@/components/ChatSidebar";
+import { ChatSidebarNew } from "@/components/ChatSidebar";
 import { sendMessage, Message, createChatSession, getChatMessages } from "@/lib/api";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Phone, Activity } from "lucide-react";
 
 interface CrisisData {
   isCrisis: boolean;
@@ -24,14 +23,8 @@ interface CrisisData {
 
 const Chat = () => {
   const [activeSessionId, setActiveSessionId] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
-      timestamp: new Date(),
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
@@ -154,14 +147,7 @@ const Chat = () => {
     try {
       const newSession = await createChatSession(USER_ID);
       setActiveSessionId(newSession.id);
-      setMessages([
-        {
-          id: '1',
-          role: 'assistant',
-          content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
-          timestamp: new Date(),
-        }
-      ]);
+      setMessages([]);
       setShowCrisisAlert(false);
       queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
       toast.success("New conversation started");
@@ -177,14 +163,7 @@ const Chat = () => {
       if (history.length > 0) {
         setMessages(history);
       } else {
-        setMessages([
-          {
-            id: '1',
-            role: 'assistant',
-            content: "Hello, I'm MindSphere. I'm here to listen and support you. How are you feeling today?",
-            timestamp: new Date(),
-          }
-        ]);
+        setMessages([]);
       }
     } catch (e) {
       console.error(e);
@@ -194,29 +173,18 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full">
-      {/* Left Sidebar - Chat History */}
-      <ChatSidebar
+    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-background">
+      {/* Sidebar */}
+      <ChatSidebarNew
         activeSessionId={activeSessionId}
         onNewChat={handleNewChat}
         onSelectSession={handleSelectSession}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative">
-        {/* Chat Header */}
-        <div className="border-b border-border bg-card p-4 shadow-sm flex justify-between items-center">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Your Safe Space</h2>
-            <p className="text-sm text-muted-foreground">A confidential conversation</p>
-          </div>
-          {showCrisisAlert && (
-            <div className="flex items-center gap-2 text-destructive font-bold animate-pulse">
-              <AlertTriangle className="h-5 w-5" />
-              <span>CRISIS RESOURCES DETECTED</span>
-            </div>
-          )}
-        </div>
+      {/* Main Area - The "Shifting" Container */}
+      <div className="flex-1 flex flex-col relative min-w-0 transition-all duration-300 ease-in-out">
 
         {/* Crisis Alert Banner */}
         {showCrisisAlert && (
@@ -231,101 +199,111 @@ const Chat = () => {
           </div>
         )}
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
-          <div className="max-w-4xl mx-auto">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
-            {isThinking && <ThinkingIndicator />}
-            <div ref={messagesEndRef} />
-          </div>
+        {/* Chat History / Hero */}
+        <div className="flex-1 overflow-y-auto pb-32">
+          {messages.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center space-y-4">
+              <div className="mb-6 rounded-full bg-primary/10 p-4">
+                <Brain className="h-12 w-12 text-primary" />
+              </div>
+              <h1 className="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60 mb-2 animate-pulse-slow">
+                Hello, Meet MindSphere.
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Your personal mental health AI assistant
+              </p>
+            </div>
+          ) : (
+            <div className="max-w-3xl mx-auto p-4 space-y-6">
+              {messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+              {isThinking && <ThinkingIndicator />}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-border bg-card p-4 shadow-lg">
-          <div className="max-w-4xl mx-auto space-y-3">
-            <div className="flex gap-2">
+        {/* Input Area - Pinned to Bottom of THIS container */}
+        <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-background via-background to-transparent z-20">
+          <div className="max-w-3xl mx-auto relative">
+            <div className="relative bg-secondary/40 backdrop-blur-md rounded-[2rem] border border-border/50 shadow-lg transition-all duration-300 focus-within:ring-1 focus-within:ring-emerald-500/50 focus-within:shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Share what's on your mind..."
-                className="min-h-[60px] resize-none bg-background"
+                className="min-h-[60px] w-full resize-none bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-4 pr-14 text-base rounded-[2rem]"
                 disabled={isThinking}
               />
               <Button
                 onClick={handleSend}
                 disabled={!input.trim() || isThinking}
                 size="icon"
-                className="h-[60px] w-[60px] flex-shrink-0 bg-primary hover:bg-primary-hover"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-primary hover:bg-primary-hover hover:scale-105 transition-transform shadow-sm"
               >
                 <Send className="h-5 w-5" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              Disclaimer: MindSphere is an AI assistant, not a licensed therapist or medical professional.
-              For emergencies, call 988 or your local crisis line.
+            <p className="text-xs text-muted-foreground/60 text-center mt-2">
+              MindSphere is an AI assistant, not a licensed therapist. For emergencies, call 15 or 1122.
             </p>
           </div>
         </div>
       </div>
 
-
       {/* Medical Crisis Overlay */}
-      {
-        crisisData && (
-          <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-            <div className="max-w-md w-full space-y-8">
-              <div className="flex flex-col items-center gap-4 text-destructive">
-                <Activity className="h-16 w-16 animate-pulse" />
-                <h1 className="text-3xl font-bold tracking-tighter">MEDICAL ALERT</h1>
+      {crisisData && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+          <div className="max-w-md w-full space-y-8">
+            <div className="flex flex-col items-center gap-4 text-destructive">
+              <Activity className="h-16 w-16 animate-pulse" />
+              <h1 className="text-3xl font-bold tracking-tighter">MEDICAL ALERT</h1>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-card border-2 border-destructive/20 p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-semibold mb-2">Primary Directive</h3>
+                <p className="text-lg leading-relaxed font-medium">
+                  {crisisData.immediate_action.primary_directive}
+                </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="bg-card border-2 border-destructive/20 p-6 rounded-xl shadow-lg">
-                  <h3 className="text-xl font-semibold mb-2">Primary Directive</h3>
-                  <p className="text-lg leading-relaxed font-medium">
-                    {crisisData.immediate_action.primary_directive}
+              <div className="bg-primary/5 p-8 rounded-full w-64 h-64 mx-auto flex items-center justify-center animate-pulse duration-[4000ms]">
+                <div className="text-center flex flex-col items-center justify-center h-full">
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Grounding</p>
+                  <p className="font-semibold text-lg leading-relaxed text-primary">
+                    {crisisData.immediate_action.grounding_technique}
                   </p>
                 </div>
-
-                <div className="bg-primary/5 p-8 rounded-full w-64 h-64 mx-auto flex items-center justify-center animate-pulse duration-[4000ms]">
-                  <div className="text-center flex flex-col items-center justify-center h-full">
-                    <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">Grounding</p>
-                    <p className="font-semibold text-lg leading-relaxed text-primary">
-                      {crisisData.immediate_action.grounding_technique}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-4">
-                {crisisData.immediate_action.emergency_contacts.map((contact, idx) => (
-                  <Button
-                    key={idx}
-                    variant="destructive"
-                    size="lg"
-                    className="w-full h-16 text-xl font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
-                    onClick={() => window.location.href = `tel:${contact.number}`}
-                  >
-                    <Phone className="h-6 w-6" />
-                    {contact.action}: {contact.number}
-                  </Button>
-                ))}
-                <Button
-                  variant="outline"
-                  className="w-full mt-4"
-                  onClick={() => setCrisisData(null)}
-                >
-                  I am safe now (Dismiss)
-                </Button>
               </div>
             </div>
+
+            <div className="space-y-3 pt-4">
+              {crisisData.immediate_action.emergency_contacts.map((contact, idx) => (
+                <Button
+                  key={idx}
+                  variant="destructive"
+                  size="lg"
+                  className="w-full h-16 text-xl font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
+                  onClick={() => window.location.href = `tel:${contact.number}`}
+                >
+                  <Phone className="h-6 w-6" />
+                  {contact.action}: {contact.number}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => setCrisisData(null)}
+              >
+                I am safe now (Dismiss)
+              </Button>
+            </div>
           </div>
-        )
-      }
-    </div >
+        </div>
+      )}
+    </div>
   );
 };
 
