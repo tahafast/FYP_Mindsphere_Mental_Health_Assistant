@@ -1,5 +1,5 @@
 // API Layer - Connected to Backend
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = 'http://localhost:49674/api/v1';
 
 export interface Message {
   id: string;
