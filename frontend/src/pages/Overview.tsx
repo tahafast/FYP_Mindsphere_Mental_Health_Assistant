@@ -32,7 +32,7 @@ const Overview = () => {
         <div className="space-y-6">
             {/* Page Header */}
             <div>
-                <h1 className="text-3xl font-bold text-foreground">Overview</h1>
+                <h1 className="text-3xl font-bold text-foreground">Emotional Journey</h1>
                 <p className="text-muted-foreground mt-1">
                     Your emotional trends and knowledge base insights
                 </p>

@@ -21,4 +21,5 @@ rank_bm25
 vaderSentiment
 transformers
 torch
+sentence-transformers
 certifi

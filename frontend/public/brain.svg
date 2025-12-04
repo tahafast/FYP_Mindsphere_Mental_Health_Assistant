@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Brain icon with cyan/teal color matching MindSphere branding -->
+  <defs>
+    <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891b2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Left hemisphere -->
+  <path d="M 20 18 Q 12 18 12 26 Q 12 32 16 36 Q 16 42 20 46 Q 20 52 26 54 Q 28 54 30 52" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Right hemisphere -->
+  <path d="M 44 18 Q 52 18 52 26 Q 52 32 48 36 Q 48 42 44 46 Q 44 52 38 54 Q 36 54 34 52" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Top connection -->
+  <path d="M 30 16 Q 32 14 34 16" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Left inner folds -->
+  <path d="M 18 24 Q 20 26 22 28" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 18 32 Q 22 34 24 36" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 20 40 Q 24 42 26 44" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Right inner folds -->
+  <path d="M 46 24 Q 44 26 42 28" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 46 32 Q 42 34 40 36" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 44 40 Q 40 42 38 44" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Center connection (corpus callosum) -->
+  <path d="M 30 28 Q 32 26 34 28" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 30 36 Q 32 34 34 36" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 30 44 Q 32 42 34 44" 
+        fill="none" stroke="url(#brainGradient)" stroke-width="2" stroke-linecap="round"/>
+</svg>

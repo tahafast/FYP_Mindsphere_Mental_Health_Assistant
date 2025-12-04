@@ -70,6 +70,23 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     safety_result = await safety_guard.validate_input(user_input)
     if safety_result.get("isCrisis"):
         logger.warning(f"⚠️ Crisis detected for user {request.user_id}: {safety_result.get('crisisType')}")
+        
+        # Log crisis event to MongoDB BEFORE returning (prevents survivor bias in LEAS graph)
+        if sentiment_collection is not None:
+            try:
+                logger.info("💾 Logging CRISIS event to MongoDB...")
+                sentiment_collection.insert_one({
+                    "user_id": request.user_id,
+                    "session_id": session_id,
+                    "timestamp": datetime.utcnow(),
+                    "sentiment_score": -1.0,  # Maximum distress
+                    "emotion_label": "crisis",
+                    "input_preview": user_input[:100]
+                })
+                logger.info("✅ Crisis event logged successfully.")
+            except Exception as e:
+                logger.error(f"❌ Error logging crisis: {e}")
+        
         return ChatResponse(
             response=json.dumps(safety_result), # Send the full JSON payload as response string for frontend to parse
             sentiment_score=-1.0,
@@ -89,6 +106,23 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     # If sentiment is FEAR and score is very low (high confidence fear), force safety protocol
     if label == 'fear' and sentiment_score < -0.8:
         logger.warning(f"⚠️ High Fear detected ({sentiment_score}). Triggering Safety Guard.")
+        
+        # Log fear-based crisis to MongoDB BEFORE returning
+        if sentiment_collection is not None:
+            try:
+                logger.info("💾 Logging FEAR-CRISIS event to MongoDB...")
+                sentiment_collection.insert_one({
+                    "user_id": request.user_id,
+                    "session_id": session_id,
+                    "timestamp": datetime.utcnow(),
+                    "sentiment_score": sentiment_score,  # Use calculated fear score
+                    "emotion_label": "crisis",
+                    "input_preview": user_input[:100]
+                })
+                logger.info("✅ Fear-crisis event logged successfully.")
+            except Exception as e:
+                logger.error(f"❌ Error logging fear-crisis: {e}")
+        
         safety_result = safety_guard.get_crisis_response()
         return ChatResponse(
             response=json.dumps(safety_result),
