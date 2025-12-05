@@ -212,17 +212,19 @@ export function BreathingModal({ isOpen, onClose, initialPreset }) {
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
             <DialogContent
-                className="max-w-4xl max-h-[95vh] flex flex-col p-0 overflow-hidden"
+                className="w-full md:w-[800px] md:min-w-[800px] h-[700px] min-h-[700px] flex flex-col p-0 gap-0 overflow-hidden !rounded-xl"
                 aria-labelledby="breathing-modal-title"
             >
-                <DialogHeader className="p-6 pb-4 border-b border-border flex-shrink-0">
+                {/* ========== ZONE 1: HEADER ========== */}
+                <DialogHeader className="p-6 border-b border-border flex-shrink-0">
                     <DialogTitle id="breathing-modal-title">Breathing Exercise</DialogTitle>
                 </DialogHeader>
 
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    {/* Preset selection - idle only */}
+                {/* ========== ZONE 2: THE STAGE (flex-1 takes all remaining space) ========== */}
+                <div className="flex-1 flex flex-col relative overflow-hidden">
+                    {/* Idle state - Setup form */}
                     {engine.status === 'idle' && (
-                        <div className="p-6 pb-4 space-y-4 flex-shrink-0">
+                        <div className="p-6 space-y-4">
                             <div>
                                 <label className="text-sm font-medium mb-2 block">Select Exercise</label>
                                 <Select
@@ -269,32 +271,38 @@ export function BreathingModal({ isOpen, onClose, initialPreset }) {
                         </div>
                     )}
 
-                    {/* Visual area */}
-                    <div className="flex-1 flex flex-col items-center justify-center overflow-hidden">
-                        {/* Breathing Stage with bubble */}
-                        <BreathingStage
-                            scale={engine.scale}
-                            step={engine.step?.type}
-                            reduceMotion={reduceMotion}
-                            isVisible={isExercising}
-                        />
-
-                        {/* HUD - separate from bubble */}
-                        <HUD
-                            step={engine.step}
-                            stepRemaining={engine.stepRemaining}
-                            elapsed={engine.elapsed}
-                            sessionRemaining={engine.sessionRemaining}
-                            cycleCount={engine.cycleCount}
-                            status={engine.status}
-                            countdown={engine.countdown}
-                            position="below"
-                        />
-                    </div>
+                    {/* Active states - Bubble animation area */}
+                    {engine.status !== 'idle' && (
+                        <div className="flex-1 flex flex-col items-center justify-center overflow-hidden">
+                            <BreathingStage
+                                scale={engine.scale}
+                                step={engine.step?.type}
+                                reduceMotion={reduceMotion}
+                                isVisible={true}
+                            />
+                        </div>
+                    )}
                 </div>
 
-                {/* Controls */}
-                <div className="p-6 pt-4 border-t border-border flex-shrink-0">
+                {/* ========== ZONE 3: FOOTER/CONTROLS (with extra bottom padding) ========== */}
+                <div className="p-6 pb-10 border-t border-border flex-shrink-0">
+                    {/* HUD info - only show when exercising */}
+                    {engine.status !== 'idle' && (
+                        <div className="mb-4">
+                            <HUD
+                                step={engine.step}
+                                stepRemaining={engine.stepRemaining}
+                                elapsed={engine.elapsed}
+                                sessionRemaining={engine.sessionRemaining}
+                                cycleCount={engine.cycleCount}
+                                status={engine.status}
+                                countdown={engine.countdown}
+                                position="below"
+                            />
+                        </div>
+                    )}
+
+                    {/* Control buttons */}
                     <Controls
                         status={engine.status}
                         audioEnabled={audioEnabled}

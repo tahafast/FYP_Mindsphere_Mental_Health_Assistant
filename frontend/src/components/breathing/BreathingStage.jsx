@@ -12,9 +12,9 @@ export function BreathingStage({ scale, step, reduceMotion, isVisible = true }) 
             style={{
                 position: 'relative',
                 width: '100%',
-                height: '50vh',
-                minHeight: '280px',
-                maxHeight: '450px',
+                height: '45vh',
+                minHeight: '300px',
+                maxHeight: '400px',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',

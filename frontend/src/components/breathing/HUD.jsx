@@ -44,9 +44,9 @@ export function HUD({
     // Countdown display
     if (status === 'countdown') {
         return (
-            <div className="flex flex-col items-center justify-center py-8" role="status" aria-live="polite">
-                <p className="text-lg text-muted-foreground mb-2">Get Ready</p>
-                <p className="text-9xl font-bold text-primary tabular-nums animate-pulse">
+            <div className="flex flex-col items-center justify-center py-6" role="status" aria-live="polite">
+                <p className="text-sm text-muted-foreground mb-2">Get Ready</p>
+                <p className="text-7xl font-bold text-primary tabular-nums animate-pulse">
                     {countdown}
                 </p>
             </div>
@@ -61,9 +61,9 @@ export function HUD({
     // Completed display
     if (status === 'completed') {
         return (
-            <div className="flex flex-col items-center justify-center py-8" role="status" aria-live="polite">
-                <p className="text-3xl font-bold text-primary mb-2">Session Complete!</p>
-                <p className="text-xl text-muted-foreground">
+            <div className="flex flex-col items-center justify-center py-4" role="status" aria-live="polite">
+                <p className="text-2xl font-bold text-primary mb-2">Complete!</p>
+                <p className="text-lg text-muted-foreground">
                     {cycleCount} cycles in {formatTime(elapsed)}
                 </p>
             </div>
@@ -72,42 +72,42 @@ export function HUD({
 
     // Active or Paused - main HUD
     return (
-        <div className="flex flex-col items-center py-4" role="status" aria-live="polite" aria-atomic="true">
+        <div className="flex flex-col items-center py-3" role="status" aria-live="polite" aria-atomic="true">
             {/* Step instruction */}
-            <div className="text-center mb-4">
-                <p className={`text-4xl md:text-5xl font-bold ${getStepColor()} transition-colors duration-200`}>
+            <div className="text-center mb-3">
+                <p className={`text-3xl md:text-4xl font-bold ${getStepColor()} transition-colors duration-200`}>
                     {getStepLabel()}
                 </p>
-                <p className="text-7xl md:text-8xl font-bold text-foreground tabular-nums mt-2">
+                <p className="text-5xl md:text-6xl font-bold text-foreground tabular-nums mt-1">
                     {Math.ceil(stepRemaining)}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">seconds</p>
+                <p className="text-xs text-muted-foreground mt-1">seconds</p>
             </div>
 
             {/* Stats row */}
-            <div className="flex items-center gap-4 text-center flex-wrap justify-center">
-                <div className="bg-background/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50">
+            <div className="flex items-center gap-3 text-center flex-wrap justify-center">
+                <div className="bg-background/70 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border/50">
                     <p className="text-xs text-muted-foreground">Elapsed</p>
-                    <p className="text-xl font-semibold text-foreground tabular-nums">{formatTime(elapsed)}</p>
+                    <p className="text-lg font-semibold text-foreground tabular-nums">{formatTime(elapsed)}</p>
                 </div>
 
-                <div className="bg-background/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50">
+                <div className="bg-background/70 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border/50">
                     <p className="text-xs text-muted-foreground">Cycles</p>
-                    <p className="text-xl font-semibold text-foreground tabular-nums">{cycleCount}</p>
+                    <p className="text-lg font-semibold text-foreground tabular-nums">{cycleCount}</p>
                 </div>
 
                 {sessionRemaining !== null && sessionRemaining > 0 && (
-                    <div className="bg-background/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50">
+                    <div className="bg-background/70 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border/50">
                         <p className="text-xs text-muted-foreground">Remaining</p>
-                        <p className="text-xl font-semibold text-foreground tabular-nums">{formatTime(sessionRemaining)}</p>
+                        <p className="text-lg font-semibold text-foreground tabular-nums">{formatTime(sessionRemaining)}</p>
                     </div>
                 )}
             </div>
 
             {/* Paused indicator */}
             {status === 'paused' && (
-                <div className="mt-4 px-4 py-2 bg-amber-500/20 border border-amber-500/50 rounded-full">
-                    <p className="text-sm font-medium text-amber-400">⏸ Paused</p>
+                <div className="mt-3 px-4 py-1.5 bg-amber-500/20 border border-amber-500/50 rounded-full">
+                    <p className="text-xs font-medium text-amber-400">⏸ Paused</p>
                 </div>
             )}
         </div>
