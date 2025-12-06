@@ -1,142 +1,1185 @@
-# MindSphere: Mental Health Assistant Leveraging Generative AI
+<p align="center">
+  <img src="./frontend/public/brain.svg" alt="MindSphere Logo" width="120" height="120" />
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-0.1-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
+<h1 align="center">🧠 MindSphere</h1>
 
-## Abstract
+<p align="center">
+  <strong>An Advanced AI Mental Health Companion with Crisis-Aware Safety Architecture</strong>
+</p>
 
-MindSphere is an advanced mental health assistant designed to provide empathetic, 24/7 support using Generative AI. It combines a **First Responder Protocol** for immediate crisis intervention with a **Longitudinal Emotional Alignment Score (LEAS)** to track user well-being over time. The system utilizes a **Hybrid RAG architecture with Reranking** to deliver clinically grounded and context-aware responses, bridging the gap between automated support and professional care.
+<p align="center">
+  <em>Bridging the gap between AI accessibility and clinical-grade emotional support</em>
+</p>
+
+<p align="center">
+  <a href="#features"><img src="https://img.shields.io/badge/Features-First%20Responder%20Protocol-red?style=for-the-badge" alt="First Responder Protocol" /></a>
+  <a href="#leas"><img src="https://img.shields.io/badge/Analytics-LEAS%20Score-blue?style=for-the-badge" alt="LEAS Analytics" /></a>
+  <a href="#rag-engine"><img src="https://img.shields.io/badge/RAG-Hybrid%20Ensemble-green?style=for-the-badge" alt="Hybrid RAG" /></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white" alt="OpenAI" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/HuggingFace-FFD21E?style=flat-square&logo=huggingface&logoColor=black" alt="HuggingFace" />
+</p>
 
 ---
 
-## Key Features
+## 📖 Table of Contents
 
-### 🛡️ First Responder Protocol
-Located in `backend/app/services/safety_guard.py`, this critical safety feature uses optimized Regex patterns to instantly detect medical emergencies and self-harm intent. It bypasses the LLM to deliver a deterministic, structured crisis response, prioritizing user safety above all else.
+<details open>
+<summary><strong>Click to expand</strong></summary>
 
-### 📈 Longitudinal Emotional Alignment Score (LEAS)
-Found in `backend/app/services/sentiment.py` and visualized in `frontend/src/components/MoodTrendChart.tsx`, LEAS is a proprietary metric derived from a distilled BERT emotion classification model. It quantifies emotional states on a scale (from -1.0 Distressed to +1.0 Thriving) and plots them against a clinical baseline to visualize progress over time.
+- [🌟 Overview](#-overview)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🔐 Safety Layer & First Responder Protocol](#-safety-layer--first-responder-protocol)
+- [📊 Sentiment Analytics & LEAS Score](#-sentiment-analytics--leas-score)
+- [🧬 RAG Intelligence Engine](#-rag-intelligence-engine)
+- [🌬️ Breathing Exercise Engine](#️-breathing-exercise-engine)
+- [🎨 Frontend Architecture](#-frontend-architecture)
+- [🔧 Backend API Reference](#-backend-api-reference)
+- [📸 Screenshots](#-screenshots)
+- [🚀 Getting Started](#-getting-started)
+- [⚙️ Configuration](#️-configuration)
+- [🧪 Testing](#-testing)
+- [📚 Project Structure](#-project-structure)
+- [🔮 Extending MindSphere](#-extending-mindsphere)
+- [📜 License](#-license)
 
-### 🧠 Hybrid RAG with Reranking
-Implemented in `backend/app/services/rag.py`, the retrieval engine combines **MongoDB Atlas Vector Search** (semantic) with **BM25** (keyword) using an `EnsembleRetriever`. Results are then refined by a **FlashRank** reranker to ensure the Large Language Model (LLM) receives the most relevant professional counseling context.
+</details>
 
 ---
 
-## System Architecture
+## 🌟 Overview
 
-```mermaid
-flowchart TD
-    User([User]) <--> UI["React Frontend\n(Vite + Shadcn/UI)"]
-    UI <--> API[FastAPI Backend]
-    
-    subgraph "Safety Layer"
-        API --> Guard{"Safety Guard\n(Regex Patterns)"}
-        Guard -- "Crisis Detected" --> Crisis["Crisis Response\n(Immediate Action)"]
-        Guard -- "Safe" --> RAG[RAG Orchestrator]
-    end
-    
-    subgraph "Intelligence Engine"
-        RAG --> VectorDB[("MongoDB Atlas\nVector Store")]
-        RAG --> BM25[BM25 Retriever]
-        VectorDB & BM25 --> Ensemble[Ensemble Retriever]
-        Ensemble --> Rerank[FlashRank Reranker]
-        Rerank --> LLM[OpenAI GPT-4o]
-    end
-    
-    subgraph "Analytics"
-        API --> Sentiment["Sentiment Engine\n(DistilBERT)"]
-        Sentiment --> LEAS[LEAS Score]
-        LEAS --> DB[("MongoDB\nLogs")]
-    end
-    
-    Crisis --> UI
-    LLM --> UI
+**MindSphere** is a full-stack AI mental health companion that combines the empathetic conversational abilities of GPT-4o with clinical-grade safety mechanisms, longitudinal emotional tracking, and evidence-based breathing exercises.
+
+### Core Philosophy
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│   "AI should be a bridge to professional care, not a barrier." │
+│                                                                 │
+│   MindSphere explicitly communicates its limitations:           │
+│   ✗ Cannot diagnose mental health conditions                   │
+│   ✗ Cannot prescribe medication                                │
+│   ✓ Can provide validated coping techniques                    │
+│   ✓ Can bridge users to emergency services when needed         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### ✨ Key Differentiators
+
+| Feature | Description |
+|---------|-------------|
+| **🚨 First Responder Protocol** | Semantic crisis detection using Sentence Transformers (not regex-only) triggers immediate safety interventions |
+| **📈 LEAS (Longitudinal Emotional Alignment Score)** | Continuous sentiment tracking via RoBERTa with sigmoid smoothing for clinical visualization |
+| **🧠 Hybrid RAG Pipeline** | BM25 + Dense Retrieval → Ensemble → FlashRank Reranking → GPT-4o generation |
+| **🌬️ Biometric Breathing Engine** | WebAudio-powered guided exercises with accessibility-first design |
+| **🎭 Dynamic Persona Switching** | Tone adapts (Directive / Empathetic / Motivational) based on detected emotional state |
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                              MINDSPHERE ARCHITECTURE                                  │
+├──────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                      │
+│    ┌─────────────────────────────────────────────────────────────────────────────┐  │
+│    │                          FRONTEND (React + Vite)                            │  │
+│    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │  │
+│    │  │  Chat UI    │  │  Dashboard  │  │  Breathing  │  │  Safety Alert UI    │ │  │
+│    │  │             │  │  + LEAS     │  │  Modal      │  │  (Crisis Overlay)   │ │  │
+│    │  │  ChatPage   │  │  Graph      │  │             │  │                     │ │  │
+│    │  │  Sidebar    │  │  Overview   │  │  Bubble     │  │  "MEDICAL ALERT"    │ │  │
+│    │  │  Messages   │  │  Insights   │  │  HUD        │  │  Emergency Contacts │ │  │
+│    │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘ │  │
+│    │         │                │                │                    │            │  │
+│    │         └────────────────┴────────────────┴────────────────────┘            │  │
+│    │                                    │                                         │  │
+│    │                                    ▼                                         │  │
+│    │                          ┌─────────────────┐                                 │  │
+│    │                          │   API Layer     │                                 │  │
+│    │                          │   (api.ts)      │                                 │  │
+│    │                          └────────┬────────┘                                 │  │
+│    └───────────────────────────────────┼─────────────────────────────────────────┘  │
+│                                        │                                             │
+│                                        ▼                                             │
+│    ┌──────────────────── FASTAPI BACKEND ────────────────────────────────────────┐  │
+│    │                                                                              │  │
+│    │   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────────────┐ │  │
+│    │   │   /chat    │   │ /sessions  │   │  /moods    │   │    /breathing      │ │  │
+│    │   │            │   │            │   │            │   │                    │ │  │
+│    │   │ Crisis     │   │ CRUD +     │   │ Log/Fetch  │   │  Start/Stop        │ │  │
+│    │   │ Detection  │   │ Auto-Title │   │ Mood Data  │   │  Presets           │ │  │
+│    │   └─────┬──────┘   └────────────┘   └─────┬──────┘   └────────────────────┘ │  │
+│    │         │                                 │                                  │  │
+│    │         ▼                                 ▼                                  │  │
+│    │   ┌──────────────────────────────────────────────────────────────────────┐  │  │
+│    │   │                        SERVICE LAYER                                  │  │  │
+│    │   │                                                                       │  │  │
+│    │   │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐   │  │  │
+│    │   │  │  SafetyGuard    │  │  SentimentSvc   │  │    RAGService       │   │  │  │
+│    │   │  │                 │  │                 │  │                     │   │  │  │
+│    │   │  │ SentenceTransf. │  │  J-Hartmann     │  │  MongoDBAtlas       │   │  │  │
+│    │   │  │ all-MiniLM-L6   │  │  RoBERTa        │  │  VectorSearch       │   │  │  │
+│    │   │  │                 │  │                 │  │                     │   │  │  │
+│    │   │  │ Prototype       │  │  Sigmoid        │  │  BM25 + Dense       │   │  │  │
+│    │   │  │ Clustering      │  │  Smoothing      │  │  → Ensemble         │   │  │  │
+│    │   │  │ (0.72 thresh)   │  │                 │  │  → FlashRank        │   │  │  │
+│    │   │  │                 │  │  Emotion→LEAS   │  │  → GPT-4o-mini      │   │  │  │
+│    │   │  └────────┬────────┘  └────────┬────────┘  └──────────┬──────────┘   │  │  │
+│    │   │           │                    │                      │              │  │  │
+│    │   └───────────┴────────────────────┴──────────────────────┘              │  │  │
+│    │                                    │                                      │  │  │
+│    └────────────────────────────────────┼──────────────────────────────────────┘  │
+│                                         │                                         │
+│                                         ▼                                         │
+│    ┌────────────────────── MONGODB ATLAS ─────────────────────────────────────┐  │
+│    │                                                                           │  │
+│    │   ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────┐ │  │
+│    │   │    vectors    │  │ chat_sessions │  │user_sentiment │  │  mood_    │ │  │
+│    │   │               │  │               │  │   _metrics    │  │   logs    │ │  │
+│    │   │  knnVector    │  │  session_id   │  │               │  │           │ │  │
+│    │   │  index        │  │  title        │  │  LEAS scores  │  │  Manual   │ │  │
+│    │   │  (cosine)     │  │  user_id      │  │  over time    │  │  check-in │ │  │
+│    │   └───────────────┘  └───────────────┘  └───────────────┘  └───────────┘ │  │
+│    │                                                                           │  │
+│    └───────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                    │
+└────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Installation & Setup
+## 🔐 Safety Layer & First Responder Protocol
+
+The Safety Layer is the **highest-priority subsystem** in MindSphere. It intercepts every user message *before* any other processing occurs.
+
+### Hybrid Detection Strategy
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                    SAFETY GUARD DETECTION FLOW                     │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│   User Message                                                     │
+│        │                                                           │
+│        ▼                                                           │
+│   ┌─────────────────────────────────────────┐                     │
+│   │      STEP 1: REGEX FAST-FAIL            │                     │
+│   │                                         │                     │
+│   │   Patterns:                             │                     │
+│   │   • "heart attack", "cardiac arrest"    │                     │
+│   │   • "chest pain|pressure|hurts"         │                     │
+│   │   • "can't breathe", "choking"          │                     │
+│   │   • "kill myself", "end it all"         │                     │
+│   │                                         │                     │
+│   │   Match found? ──────────────────────────────► CRISIS RESPONSE │
+│   │        │                                │                     │
+│   │        │ No match                       │                     │
+│   │        ▼                                │                     │
+│   └─────────────────────────────────────────┘                     │
+│                                                                    │
+│   ┌─────────────────────────────────────────┐                     │
+│   │      STEP 2: SEMANTIC SIMILARITY        │                     │
+│   │                                         │                     │
+│   │   Model: all-MiniLM-L6-v2               │                     │
+│   │   (384-dim sentence embeddings)         │                     │
+│   │                                         │                     │
+│   │   Crisis Prototypes:                    │                     │
+│   │   ┌───────────────────────────────────┐ │                     │
+│   │   │ Cluster 1: Active Immediate Threat│ │                     │
+│   │   │  • "I want to die"                │ │                     │
+│   │   │  • "I am going to kill myself"    │ │                     │
+│   │   │  • "I have a plan to end my life" │ │                     │
+│   │   ├───────────────────────────────────┤ │                     │
+│   │   │ Cluster 2: Passive Ideation       │ │                     │
+│   │   │  • "I want to go to sleep..."     │ │                     │
+│   │   │  • "I wish I could disappear"     │ │                     │
+│   │   │  • "I don't want to exist"        │ │                     │
+│   │   ├───────────────────────────────────┤ │                     │
+│   │   │ Cluster 3: Perceived Burden       │ │                     │
+│   │   │  • "World better off without me"  │ │                     │
+│   │   │  • "I am a burden to everyone"    │ │                     │
+│   │   │  • "There is no point going on"   │ │                     │
+│   │   └───────────────────────────────────┘ │                     │
+│   │                                         │                     │
+│   │   Cosine Similarity > 0.72? ─────────────────► CRISIS RESPONSE │
+│   │        │                                │                     │
+│   │        │ Below threshold                │                     │
+│   │        ▼                                │                     │
+│   │   PROCEED TO RAG PIPELINE               │                     │
+│   └─────────────────────────────────────────┘                     │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+### Why 0.72 Threshold?
+
+The threshold of **0.72** was carefully calibrated to catch:
+- Passive ideation phrases ("I'm tired of being here")
+- Semantic variations that regex misses
+- While avoiding false positives on general sadness
+
+### First Responder Protocol Response
+
+When crisis is detected, the system returns a structured JSON payload:
+
+```json
+{
+  "isCrisis": true,
+  "crisisType": "medical_emergency",
+  "message": "⚠️ MEDICAL ALERT DETECTED",
+  "immediate_action": {
+    "primary_directive": "Stop everything. Sit down comfortably. Loosen tight clothing.",
+    "grounding_technique": "Focus on staying conscious. Breathe slowly: Inhale (4s) ... Hold (4s) ... Exhale (4s).",
+    "emergency_contacts": [
+      { "name": "Rescue (Ambulance)", "number": "1122", "action": "Call Now" },
+      { "name": "Police", "number": "15", "action": "Backup" }
+    ]
+  },
+  "detection_method": "semantic_model"
+}
+```
+
+### Frontend Crisis Overlay
+
+The frontend renders a **full-screen takeover** with:
+- Pulsing medical alert icon
+- Large, readable emergency buttons
+- Grounding technique instructions
+- "I am safe now" dismissal option
+
+### Safety Logging
+
+All crisis events are logged to MongoDB with:
+- User ID
+- Session ID  
+- Timestamp
+- Sentiment score (-1.0 for crisis)
+- Emotion label ("crisis")
+- Input preview (first 100 chars)
+
+---
+
+## 📊 Sentiment Analytics & LEAS Score
+
+### Sentiment Pipeline Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SENTIMENT ANALYSIS PIPELINE                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   User Message                                                               │
+│        │                                                                     │
+│        ▼                                                                     │
+│   ┌────────────────────────────────────────┐                                │
+│   │        TEXT PREPROCESSING               │                                │
+│   │                                         │                                │
+│   │   • Capitalize standalone 'i' → 'I'    │                                │
+│   │   • Preserve formatting                 │                                │
+│   └────────────────┬────────────────────────┘                                │
+│                    │                                                         │
+│                    ▼                                                         │
+│   ┌────────────────────────────────────────┐                                │
+│   │    J-HARTMANN EMOTION ROBERTA          │                                │
+│   │                                         │                                │
+│   │   Model: j-hartmann/emotion-english-   │                                │
+│   │          distilroberta-base            │                                │
+│   │                                         │                                │
+│   │   Labels: anger | disgust | fear |     │                                │
+│   │           joy | neutral | sadness |    │                                │
+│   │           surprise                     │                                │
+│   │                                         │                                │
+│   │   Output: { label, confidence }        │                                │
+│   └────────────────┬────────────────────────┘                                │
+│                    │                                                         │
+│                    ▼                                                         │
+│   ┌────────────────────────────────────────┐                                │
+│   │       SIGMOID SMOOTHING                 │                                │
+│   │                                         │                                │
+│   │   Formula: σ(x) = 1 / (1 + e^(-k(x-0.5)))                               │
+│   │   Where k = 10 (steepness)             │                                │
+│   │                                         │                                │
+│   │   Purpose: Prevent extreme jumps in    │                                │
+│   │   graph visualization                   │                                │
+│   └────────────────┬────────────────────────┘                                │
+│                    │                                                         │
+│                    ▼                                                         │
+│   ┌────────────────────────────────────────┐                                │
+│   │    CONFIDENCE-AWARE DYNAMIC MAPPING     │                                │
+│   │                                         │                                │
+│   │   ┌─────────────────────────────────┐  │                                │
+│   │   │ joy (high conf > 0.75)          │  │                                │
+│   │   │   → +0.5 to +1.0 (Thriving)     │  │                                │
+│   │   ├─────────────────────────────────┤  │                                │
+│   │   │ joy (low conf < 0.75)           │  │                                │
+│   │   │   → 0.0 to +0.4 (Stable)        │  │                                │
+│   │   ├─────────────────────────────────┤  │                                │
+│   │   │ neutral                          │  │                                │
+│   │   │   → 0.0 (Baseline)              │  │                                │
+│   │   ├─────────────────────────────────┤  │                                │
+│   │   │ sadness (high conf)             │  │                                │
+│   │   │   → -0.3 to -1.0 (Distressed)   │  │                                │
+│   │   ├─────────────────────────────────┤  │                                │
+│   │   │ anger | fear | disgust          │  │                                │
+│   │   │   → -0.4 to -1.0 (High Distress)│  │                                │
+│   │   └─────────────────────────────────┘  │                                │
+│   │                                         │                                │
+│   │   Special: Neutral keyword override    │                                │
+│   │   ("just okay" → caps joy at 0.2)     │                                │
+│   └────────────────┬────────────────────────┘                                │
+│                    │                                                         │
+│                    ▼                                                         │
+│            ┌───────────────┐                                                 │
+│            │  LEAS SCORE   │  Final: -1.0 to +1.0                           │
+│            │  (persisted)  │                                                 │
+│            └───────┬───────┘                                                 │
+│                    │                                                         │
+│                    ▼                                                         │
+│           MongoDB Collection                                                 │
+│           "user_sentiment_metrics"                                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### LEAS Graph Visualization
+
+The frontend renders an interactive Recharts `LineChart` with:
+
+| Zone | Score Range | Color |
+|------|-------------|-------|
+| Thriving | +0.5 to +1.0 | Green |
+| Stable | +0.1 to +0.5 | Blue |
+| Neutral | -0.1 to +0.1 | Gray |
+| Anxious | -0.5 to -0.1 | Orange |
+| Distressed | -1.0 to -0.5 | Red |
+
+**Clinical Baseline**: A dashed red reference line at **-0.05** indicates the threshold below which clinical attention may be warranted.
+
+---
+
+## 🧬 RAG Intelligence Engine
+
+### Pipeline Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       RAG INTELLIGENCE PIPELINE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   User Query                                                                 │
+│        │                                                                     │
+│        ▼                                                                     │
+│   ┌─────────────────────────────────────────────┐                           │
+│   │            HYBRID RETRIEVAL                  │                           │
+│   │                                              │                           │
+│   │   ┌────────────────┐   ┌────────────────┐   │                           │
+│   │   │  BM25 Retriever│   │ Dense Retriever│   │                           │
+│   │   │   (Keyword)    │   │   (Semantic)   │   │                           │
+│   │   │                │   │                │   │                           │
+│   │   │   Weight: 0.3  │   │   Weight: 0.7  │   │                           │
+│   │   │                │   │                │   │                           │
+│   │   │  rank_bm25     │   │  MongoDB Atlas │   │                           │
+│   │   │  in-memory     │   │  VectorSearch  │   │                           │
+│   │   │  k=20          │   │  k=20          │   │                           │
+│   │   └───────┬────────┘   └───────┬────────┘   │                           │
+│   │           │                    │            │                           │
+│   │           └──────────┬─────────┘            │                           │
+│   │                      │                      │                           │
+│   │                      ▼                      │                           │
+│   │           ┌────────────────────┐            │                           │
+│   │           │ EnsembleRetriever  │            │                           │
+│   │           │  (Reciprocal Rank  │            │                           │
+│   │           │   Fusion)          │            │                           │
+│   │           └─────────┬──────────┘            │                           │
+│   │                     │                       │                           │
+│   └─────────────────────┼───────────────────────┘                           │
+│                         │                                                    │
+│                         ▼                                                    │
+│   ┌─────────────────────────────────────────────┐                           │
+│   │           FLASHRANK RERANKER                 │                           │
+│   │                                              │                           │
+│   │   Model: ms-marco-MiniLM-L-12-v2            │                           │
+│   │                                              │                           │
+│   │   Purpose: Cross-encoder scoring for        │                           │
+│   │   relevance-based reordering                │                           │
+│   │                                              │                           │
+│   │   Output: Top contexts sorted by relevance  │                           │
+│   └─────────────────────┬───────────────────────┘                           │
+│                         │                                                    │
+│                         ▼                                                    │
+│   ┌─────────────────────────────────────────────┐                           │
+│   │         DYNAMIC PROMPT INJECTION             │                           │
+│   │                                              │                           │
+│   │   Base Template:                             │                           │
+│   │   ┌────────────────────────────────────────┐│                           │
+│   │   │ ### IDENTITY & LIMITATIONS             ││                           │
+│   │   │ You are MindSphere, an advanced AI...  ││                           │
+│   │   │                                        ││                           │
+│   │   │ ### CRISIS INTERVENTION PROTOCOL       ││                           │
+│   │   │ (HIGHEST PRIORITY)                     ││                           │
+│   │   │ If user expresses intent of self-harm..││                           │
+│   │   │                                        ││                           │
+│   │   │ ### CURRENT MODE & TONE                ││                           │
+│   │   │ {tone_section} ← Dynamic injection     ││                           │
+│   │   │                                        ││                           │
+│   │   │ ### RAG CONTEXT USAGE                  ││                           │
+│   │   │ Peer Context: {context}                ││                           │
+│   │   │                                        ││                           │
+│   │   │ User: {question}                       ││                           │
+│   │   │ Dr. MindSphere:                        ││                           │
+│   │   └────────────────────────────────────────┘│                           │
+│   │                                              │                           │
+│   │   Tone Sections:                             │                           │
+│   │   • DIRECTIVE  → fear/anger detected        │                           │
+│   │   • EMPATHETIC → sadness detected           │                           │
+│   │   • MOTIVATIONAL → joy/love detected        │                           │
+│   │   • DEFAULT → neutral                       │                           │
+│   └─────────────────────┬───────────────────────┘                           │
+│                         │                                                    │
+│                         ▼                                                    │
+│   ┌─────────────────────────────────────────────┐                           │
+│   │              GPT-4o-mini                     │                           │
+│   │                                              │                           │
+│   │   Temperature: 0.7                           │                           │
+│   │                                              │                           │
+│   │   → Empathetic, contextual response         │                           │
+│   └─────────────────────────────────────────────┘                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### MongoDB Vector Store Schema
+
+```javascript
+// Collection: vectors
+{
+  "_id": ObjectId,
+  "text": "Chunk content from processed document...",
+  "embedding": [0.023, -0.156, ...], // 1536 dimensions (text-embedding-3-small)
+  "metadata": {
+    "source": "reddit_pdf",
+    "type": "thread",
+    "sentiment_tag": "anxiety",  // auto-tagged during ingestion
+    "Header 1": "Chapter Title",
+    "Header 2": "Section Title"
+  }
+}
+```
+
+### Atlas Search Index Definition
+
+```json
+{
+  "name": "default",
+  "definition": {
+    "mappings": {
+      "dynamic": true,
+      "fields": {
+        "embedding": {
+          "dimensions": 1536,
+          "similarity": "cosine",
+          "type": "knnVector"
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🌬️ Breathing Exercise Engine
+
+The Breathing Engine is a **complete frontend subsystem** with its own state machine, timer synchronization, WebAudio synthesis, and accessibility support.
+
+### Component Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    BREATHING ENGINE ARCHITECTURE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                     BreathingModal.jsx                               │   │
+│   │                     (Orchestrator)                                   │   │
+│   │                                                                      │   │
+│   │   Responsibilities:                                                  │   │
+│   │   • Preset selection (4-4-4 Box, 4-7-8, Resonant, Guided Slow)     │   │
+│   │   • Duration configuration                                          │   │
+│   │   • Audio/Motion toggle persistence (localStorage)                  │   │
+│   │   • Backend session start/stop API calls                           │   │
+│   │   • Coordinates all child components                                │   │
+│   └───────────────────────────┬─────────────────────────────────────────┘   │
+│                               │                                              │
+│           ┌───────────────────┼───────────────────┐                         │
+│           │                   │                   │                         │
+│           ▼                   ▼                   ▼                         │
+│   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐                │
+│   │BreathingStage │   │     HUD       │   │   Controls    │                │
+│   │               │   │               │   │               │                │
+│   │ • Container   │   │ • Step label  │   │ • Start/Pause │                │
+│   │   overflow    │   │   (Breathe In │   │ • Resume/Stop │                │
+│   │ • Background  │   │    /Hold/Out) │   │ • Reset       │                │
+│   │   gradient    │   │ • Countdown   │   │ • Audio toggle│                │
+│   │               │   │ • Elapsed     │   │ • Motion      │                │
+│   │   ┌───────┐   │   │ • Remaining   │   │   toggle      │                │
+│   │   │Bubble │   │   │ • Cycles      │   │               │                │
+│   │   │       │   │   │               │   │               │                │
+│   │   │ scale │   │   │ Color-coded   │   │ State-aware   │                │
+│   │   │  CSS  │   │   │ labels        │   │ button render │                │
+│   │   │       │   │   │               │   │               │                │
+│   │   └───────┘   │   └───────────────┘   └───────────────┘                │
+│   └───────────────┘                                                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### State Machine Flow
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                    BREATHING ENGINE STATE FLOW                      │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│      ┌───────────────────────────────────────────────────────┐    │
+│      │                                                        │    │
+│      │    ┌────────┐                                         │    │
+│      │    │  IDLE  │◄────────────────────────────────────┐   │    │
+│      │    └───┬────┘                                     │   │    │
+│      │        │ start(countdownSeconds)                  │   │    │
+│      │        ▼                                          │   │    │
+│      │    ┌────────────┐                                 │   │    │
+│      │    │ COUNTDOWN  │ ← 3... 2... 1...               │   │    │
+│      │    │            │                                 │   │    │
+│      │    │  Effect:   │                                 │   │    │
+│      │    │  setInterval(1s) decrements countdown       │   │    │
+│      │    └─────┬──────┘                                 │   │    │
+│      │          │ countdown === 0                        │   │    │
+│      │          ▼                                        │   │    │
+│      │    ┌────────────┐     pause()     ┌────────────┐ │   │    │
+│      │    │   ACTIVE   │◄───────────────►│  PAUSED    │ │   │    │
+│      │    │            │     resume()    │            │ │   │    │
+│      │    │  rAF Loop: │                 │  rAF       │ │   │    │
+│      │    │  • tick()  │                 │  stopped   │ │   │    │
+│      │    │  • 60fps   │                 │            │ │   │    │
+│      │    └─────┬──────┘                 └─────┬──────┘ │   │    │
+│      │          │                              │        │   │    │
+│      │          │ sessionDuration reached      │ stop() │   │    │
+│      │          │ OR stop()                    │        │   │    │
+│      │          ▼                              │        │   │    │
+│      │    ┌────────────┐◄─────────────────────┘        │   │    │
+│      │    │ COMPLETED  │                                │   │    │
+│      │    │            │                                │   │    │
+│      │    │  Display:  │                                │   │    │
+│      │    │  "X cycles │                                │   │    │
+│      │    │   in Y:ZZ" │                                │   │    │
+│      │    └─────┬──────┘                                │   │    │
+│      │          │ reset()                               │   │    │
+│      │          └───────────────────────────────────────┘   │    │
+│      │                                                        │    │
+│      └───────────────────────────────────────────────────────┘    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+### useBreathingEngine Hook
+
+The core hook (`useBreathingEngine.js`) manages:
+
+| State | Type | Description |
+|-------|------|-------------|
+| `status` | `'idle' \| 'countdown' \| 'active' \| 'paused' \| 'completed'` | Current engine state |
+| `countdown` | `number` | Pre-start countdown (default: 3) |
+| `stepIndex` | `number` | Current index in step array |
+| `stepElapsed` | `number` | Seconds elapsed in current step |
+| `scale` | `number` | Bubble scale (0.7 to 2.5) |
+| `cycleCount` | `number` | Completed breathing cycles |
+
+**Animation Loop**: Uses `requestAnimationFrame` for 60fps updates with delta-time compensation and easing (`easeInOutQuad`).
+
+### WebAudio Engine
+
+`breathingAudio.js` creates a synthesized ambient soundscape:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    WEBAUDIO SIGNAL GRAPH                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────┐ │
+│   │ Oscillator │───►│  LowPass   │───►│  GainNode  │───►│ Master │ │
+│   │   (sine)   │    │  Filter    │    │  (step)    │    │  Gain  │ │
+│   └────────────┘    └────────────┘    └────────────┘    └───┬────┘ │
+│                                                              │      │
+│   Step-specific parameters:                                  │      │
+│                                                              ▼      │
+│   INHALE: freq 80→200Hz, filter 400→1000Hz, gain 0.02→0.1  ●       │
+│   HOLD:   freq 100Hz, filter 500Hz, gain 0.03→0.05         AudioDestination
+│   EXHALE: freq 180→60Hz, filter 800→300Hz, gain 0.08→0.01         │
+│                                                                      │
+│   Accessibility: reduceMotion = simple 440Hz chime                  │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Accessibility Features
+
+| Feature | Implementation |
+|---------|----------------|
+| **Reduced Motion** | `prefers-reduced-motion` media query detection |
+| **Focus Management** | `focus-visible` outline for keyboard navigation |
+| **Screen Reader** | `role="status"` and `aria-live="polite"` on HUD |
+| **High Contrast** | `prefers-contrast: high` font weight adjustments |
+| **Tabular Numbers** | `font-variant-numeric: tabular-nums` for timer stability |
+
+---
+
+## 🎨 Frontend Architecture
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | React 18 + Vite |
+| **Language** | TypeScript |
+| **Styling** | TailwindCSS + shadcn/ui |
+| **State** | React Query (TanStack Query) |
+| **Routing** | React Router v6 |
+| **Charts** | Recharts |
+| **Animations** | CSS + requestAnimationFrame |
+| **Audio** | WebAudio API |
+| **Icons** | Lucide React |
+
+### Page Structure
+
+```
+src/
+├── pages/
+│   ├── Chat.tsx              # Main AI chat interface
+│   ├── Overview.tsx          # Dashboard home (LEAS graph, insights)
+│   ├── Personalization.tsx   # User settings
+│   ├── Recommendations.tsx   # AI-suggested resources
+│   ├── SafetyLogs.tsx        # Crisis intervention audit log
+│   └── BreathingLibrary.tsx  # Breathing exercise launcher
+├── components/
+│   ├── breathing/
+│   │   ├── BreathingModal.jsx
+│   │   ├── BreathingStage.jsx
+│   │   ├── Bubble.jsx
+│   │   ├── HUD.jsx
+│   │   ├── Controls.jsx
+│   │   └── index.js
+│   ├── ChatMessage.tsx
+│   ├── ChatSidebar.tsx
+│   ├── MoodTrendChart.tsx
+│   ├── HeroGreeting.tsx
+│   ├── TopNav.tsx
+│   └── ui/                   # shadcn/ui primitives
+├── hooks/
+│   ├── useBreathingEngine.js
+│   ├── use-mobile.tsx
+│   └── use-toast.ts
+├── utils/
+│   └── audio/
+│       └── breathingAudio.js
+├── lib/
+│   ├── api.ts                # Backend API client
+│   └── utils.ts              # cn() helper
+└── styles/
+    └── breathing.css
+```
+
+### Key Components
+
+#### `Chat.tsx`
+- Session management with auto-initialization
+- Sidebar toggle with content-shift animation
+- Crisis overlay rendering
+- Message history with auto-scroll
+
+#### `MoodTrendChart.tsx`
+- Recharts LineChart with clinical zones
+- Reference area color-coding
+- Conditional dot coloring (red below baseline)
+- Responsive container
+
+#### `ChatSidebar.tsx`
+- Collapsible rail pattern
+- Query-based session fetching
+- Delete mutation with optimistic updates
+- Mobile sheet drawer
+
+---
+
+## 🔧 Backend API Reference
+
+### Base URL
+
+```
+http://localhost:8000/api/v1
+```
+
+### Endpoints
+
+<details>
+<summary><strong>💬 Chat</strong></summary>
+
+#### `POST /chat`
+
+Process a user message through the safety/RAG pipeline.
+
+**Request:**
+```json
+{
+  "user_id": "user123",
+  "session_id": "abc-123-def",
+  "message": "I've been feeling anxious lately"
+}
+```
+
+**Response:**
+```json
+{
+  "response": "I hear that you've been feeling anxious...",
+  "sentiment_score": -0.35,
+  "sentiment_label": "fear",
+  "crisis_detected": false
+}
+```
+
+**Crisis Response:**
+```json
+{
+  "response": "{\"isCrisis\": true, ...}",
+  "sentiment_score": -1.0,
+  "sentiment_label": "crisis",
+  "crisis_detected": true
+}
+```
+
+</details>
+
+<details>
+<summary><strong>📊 Sessions</strong></summary>
+
+#### `POST /sessions?user_id={user_id}`
+Create a new chat session.
+
+#### `GET /sessions?user_id={user_id}`
+List all active sessions.
+
+#### `DELETE /sessions/{session_id}`
+Soft-delete a session.
+
+#### `GET /sessions/{session_id}/messages`
+Get chat history for a session.
+
+#### `POST /sessions/{session_id}/title`
+Auto-generate title from first message.
+
+</details>
+
+<details>
+<summary><strong>😊 Moods</strong></summary>
+
+#### `POST /moods`
+Log a manual mood check-in.
+
+```json
+{
+  "user_id": "user123",
+  "mood": "happy"  // "sad" | "neutral" | "happy"
+}
+```
+
+#### `GET /moods/latest?user_id={user_id}`
+Get today's most recent mood.
+
+</details>
+
+<details>
+<summary><strong>📈 User Analytics</strong></summary>
+
+#### `GET /user/mood-history?user_id={user_id}`
+Get all sentiment logs for LEAS graph.
+
+#### `GET /user/insights?user_id={user_id}`
+Get weekly summary with interpretation.
+
+</details>
+
+<details>
+<summary><strong>🌬️ Breathing</strong></summary>
+
+#### `GET /breathing/techniques`
+Get all built-in breathing techniques.
+
+#### `GET /breathing/presets?user_id={user_id}`
+Get user + built-in presets.
+
+#### `POST /breathing/session/start`
+Start a breathing session.
+
+#### `POST /breathing/session/stop`
+Save completed session.
+
+#### `POST /breathing/presets`
+Create custom preset.
+
+#### `DELETE /breathing/presets/{preset_id}`
+Delete user preset.
+
+</details>
+
+<details>
+<summary><strong>📚 Knowledge</strong></summary>
+
+#### `POST /knowledge/upload`
+Upload and process a PDF for RAG.
+
+#### `GET /knowledge/stats`
+Get vector store statistics.
+
+</details>
+
+---
+
+## 📸 Screenshots
+
+### 💬 Chat Interface
+*Main AI conversation interface with crisis-aware messaging and dynamic sidebar*
+
+![Chat Interface](./screenshots/chatinterface.png)
+
+---
+
+### 📊 Dashboard & LEAS Graph
+*Longitudinal Emotional Alignment Score visualization with clinical zones*
+
+![Dashboard](./screenshots/dashboard.png)
+
+![Sentiment Graph](./screenshots/sentiment_graph.png)
+
+---
+
+### 🌬️ Breathing Exercise
+*Interactive guided breathing with WebAudio synthesis and real-time HUD*
+
+![Breathing Exercise](./screenshots/breathing%20exercise.png)
+
+![Breathing Complete](./screenshots/breathing%20complete.png)
+
+![Breathing HUD Layout](./screenshots/breathingHUDlayout.png)
+
+---
+
+### 🚨 Crisis Protocol
+*Full-screen First Responder Protocol overlay with emergency contacts*
+
+![Crisis Protocol](./screenshots/crisisprotocol.png)
+
+---
+
+### 🛡️ Safety Logs
+*Audit trail of safety interventions and crisis detections*
+
+![Safety Logs](./screenshots/safetylogs.png)
+
+---
+
+### 💡 Recommendations
+*AI-powered resource suggestions based on user interactions*
+
+![Recommendations](./screenshots/recommendations.png)
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** (v18+)
-- **Python** (v3.10+)
-- **MongoDB Atlas** Cluster (Vector Search enabled)
 
-### 1. Backend Setup
-Navigate to the backend directory and install dependencies:
+| Requirement | Version |
+|-------------|---------|
+| Node.js | ≥ 18.x |
+| Python | ≥ 3.10 |
+| MongoDB Atlas | Free tier or higher |
+| OpenAI API Key | GPT-4o access |
+
+### Quick Start
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/mindsphere.git
+cd mindsphere
+
+# 2. Configure environment variables
+cp .env.example .env
+# Edit .env with your API keys (see Configuration section)
+
+# 3. Backend setup
 cd backend
 python -m venv venv
-# Windows
-.\venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
-
+.\venv\Scripts\Activate  # Windows
+source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
+
+# 4. Frontend setup
+cd ../frontend
+npm install
+
+# 5. Start both services (Windows)
+cd ..
+start.bat
+
+# 5. Start both services (Linux/Mac)
+# Terminal 1:
+cd backend && python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+# Terminal 2:
+cd frontend && npm run dev
 ```
 
-Create a `.env` file in the `backend/` directory:
+### Access Points
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:8080 |
+| Backend API | http://localhost:8000 |
+| API Documentation | http://localhost:8000/docs |
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
 ```env
-OPENAI_API_KEY=your_key_here
-MONGODB_URI=your_mongodb_atlas_uri
+# OpenAI Configuration
+OPENAI_API_KEY=sk-your-api-key-here
+
+# MongoDB Atlas Connection
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/?retryWrites=true&w=majority
+
+# Database Configuration
 MONGODB_DB_NAME=mindsphere
 ```
 
-### 2. Frontend Setup
-Navigate to the frontend directory and install dependencies:
+Create a `.env` file in the `backend/` directory:
+
+```env
+OPENAI_API_KEY=sk-your-api-key-here
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB_NAME=mindsphere
+```
+
+### MongoDB Atlas Setup
+
+1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a database named `mindsphere`
+3. Create the following collections:
+   - `vectors`
+   - `chat_sessions`
+   - `chat_histories`
+   - `user_sentiment_metrics`
+   - `mood_logs`
+   - `breathing_sessions`
+   - `breathing_presets`
+4. Create an Atlas Search Index on `vectors`:
+
+```json
+{
+  "name": "default",
+  "definition": {
+    "mappings": {
+      "dynamic": true,
+      "fields": {
+        "embedding": {
+          "dimensions": 1536,
+          "similarity": "cosine",
+          "type": "knnVector"
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🧪 Testing
+
+### Frontend Tests
 
 ```bash
 cd frontend
-npm install
+npm run test
 ```
 
-Start the development server:
+#### Breathing Engine Tests (`useBreathingEngine.test.js`)
+
+Tests cover:
+- State initialization
+- Countdown → Active transitions
+- Step cycling and wrap-around
+- Pause/Resume functionality
+- Scale calculation with easing
+- Cleanup on unmount
+
+### Backend Tests
+
 ```bash
-npm run dev
+cd backend
+python -m pytest
 ```
 
-### 3. Data Ingestion
-Run the ingestion script to populate the Vector Database with Hugging Face datasets:
+Test files:
+- `test_enhancements.py` - Service integration tests
+- `test_mongo_connection.py` - Database connectivity
+- `test_sentiment_model.py` - RoBERTa model validation
 
-```bash
-# From the backend directory
-python -m app.services.ingest_hf
+---
+
+## 📚 Project Structure
+
+```
+mindsphere/
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── v1/
+│   │   │       └── endpoints/
+│   │   │           ├── breathing.py
+│   │   │           ├── chat.py
+│   │   │           ├── knowledge.py
+│   │   │           ├── moods.py
+│   │   │           ├── sessions.py
+│   │   │           └── user.py
+│   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   └── prompts.py
+│   │   ├── models/
+│   │   │   ├── breathing.py
+│   │   │   ├── chat.py
+│   │   │   ├── mood_log.py
+│   │   │   └── session.py
+│   │   └── services/
+│   │       ├── ingestion.py
+│   │       ├── ingest_hf.py
+│   │       ├── rag.py
+│   │       ├── safety_guard.py
+│   │       └── sentiment.py
+│   ├── main.py
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── breathing/
+│   │   │   └── ui/
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   ├── pages/
+│   │   ├── styles/
+│   │   └── utils/
+│   ├── index.html
+│   └── package.json
+├── .env.example
+├── start.bat
+└── README.md
 ```
 
 ---
 
-## User Interface
+## 🔮 Extending MindSphere
 
-### 📊 Dashboard & Analytics
-*Real-time tracking of emotional trends using the LEAS metric.*
+### Adding a New Breathing Technique
 
-![Dashboard UI Placeholder](https://placehold.co/800x450?text=Dashboard+UI+Screenshot)
+1. **Backend** (`backend/app/api/v1/endpoints/breathing.py`):
 
-### 💬 AI Chat Interface
-*Empathetic, context-aware conversations powered by Hybrid RAG.*
+```python
+BUILTIN_TECHNIQUES["my-technique"] = {
+    "id": "my-technique",
+    "name": "My Custom Technique",
+    "description": "Description here",
+    "use_case": "Use case",
+    "steps": [
+        {"type": "inhale", "duration": 5},
+        {"type": "hold", "duration": 2},
+        {"type": "exhale", "duration": 7},
+    ]
+}
+```
 
-![Chat UI Placeholder](https://placehold.co/800x450?text=Chat+UI+Screenshot)
+2. **Frontend** (`frontend/src/components/breathing/BreathingModal.jsx`):
+
+```javascript
+PRESET_CONFIGS['my-technique'] = {
+    steps: [
+        { type: 'inhale', duration: 5 },
+        { type: 'hold', duration: 2 },
+        { type: 'exhale', duration: 7 },
+    ],
+};
+```
+
+### Adding a New Crisis Prototype Cluster
+
+In `backend/app/services/safety_guard.py`:
+
+```python
+self.crisis_prototypes.extend([
+    # Cluster 4: Substance Abuse Crisis
+    "I can't stop using",
+    "I need to get high right now",
+])
+
+self.cluster_labels.extend([
+    "Substance Abuse Crisis",
+    "Substance Abuse Crisis",
+])
+```
+
+### Customizing the LLM Prompt
+
+Edit `backend/app/core/prompts.py` to add new persona modes or modify existing ones.
+
+### Adding New Sentiment Mappings
+
+In `backend/app/services/sentiment.py`, modify the `analyze_emotion` method to handle new emotion labels or scoring rules.
 
 ---
 
-## Tech Stack
+## 📜 License
 
-**Frontend:**
-- React, Vite, TypeScript
-- TailwindCSS, Shadcn/UI
-- Recharts (Data Visualization)
+This project is developed as a Final Year Project (FYP) for academic purposes.
 
-**Backend:**
-- FastAPI, Uvicorn
-- LangChain, OpenAI
-- PyMongo, Motor
-- Transformers, Torch
+---
 
-**AI & Data:**
-- MongoDB Atlas Vector Search
-- FlashRank (Reranking)
-- DistilBERT (Sentiment Analysis)
+<p align="center">
+  <strong>Built with 💚 for mental health awareness</strong>
+</p>
+
+<p align="center">
+  <em>MindSphere is not a replacement for professional mental health care.<br/>
+  If you are in crisis, please contact your local emergency services or crisis hotline.</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Made%20with-FastAPI-009688?style=flat-square&logo=fastapi" />
+  <img src="https://img.shields.io/badge/Made%20with-React-61DAFB?style=flat-square&logo=react" />
+  <img src="https://img.shields.io/badge/Made%20with-Love-ff69b4?style=flat-square" />
+</p>
