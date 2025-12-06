@@ -142,3 +142,143 @@ export const getChatMessages = async (sessionId: string): Promise<Message[]> => 
   }));
 };
 
+// Mood Logging APIs
+export interface MoodLogRequest {
+  user_id: string;
+  mood: 'sad' | 'neutral' | 'happy';
+}
+
+export interface MoodLogResponse {
+  user_id: string;
+  mood: string;
+  timestamp: string;
+  message: string;
+}
+
+export interface TodaysMood {
+  mood: string;
+  timestamp: string;
+}
+
+export interface UserInsights {
+  check_in_count: number;
+  exercises_completed: number;
+  interpretation: string;
+}
+
+export const logMood = async (userId: string, mood: 'sad' | 'neutral' | 'happy'): Promise<MoodLogResponse> => {
+  return fetchApi<MoodLogResponse>('/moods', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId, mood }),
+  });
+};
+
+export const getTodaysMood = async (userId: string): Promise<TodaysMood | null> => {
+  try {
+    return await fetchApi<TodaysMood>(`/moods/latest?user_id=${userId}`);
+  } catch {
+    return null;
+  }
+};
+
+export const getUserInsights = async (userId: string): Promise<UserInsights> => {
+  return fetchApi<UserInsights>(`/user/insights?user_id=${userId}`);
+};
+
+// Breathing Exercise APIs
+export interface BreathingTechnique {
+  id: string;
+  name: string;
+  description: string;
+  use_case: string;
+  steps: Array<{ type: string; duration: number }>;
+}
+
+export interface BreathingPreset {
+  preset_id: string;
+  name: string;
+  technique_id: string;
+  config: any;
+  is_builtin?: boolean;
+}
+
+export interface SessionStartResponse {
+  session_id: string;
+  expires_at: string;
+}
+
+export interface SessionStopResponse {
+  session_id: string;
+  duration_seconds: number;
+  cycles_completed: number;
+  completed: boolean;
+}
+
+export const startBreathingSession = async (
+  userId: string,
+  techniqueId: string,
+  presetName?: string,
+  durationMinutes?: number
+): Promise<SessionStartResponse> => {
+  return fetchApi<SessionStartResponse>('/breathing/session/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user_id: userId,
+      technique_id: techniqueId,
+      preset_name: presetName,
+      duration_minutes: durationMinutes,
+      start_timestamp: new Date().toISOString()
+    }),
+  });
+};
+
+export const stopBreathingSession = async (
+  sessionId: string,
+  cyclesCompleted: number,
+  durationSeconds: number,
+  completed: boolean
+): Promise<SessionStopResponse> => {
+  return fetchApi<SessionStopResponse>('/breathing/session/stop', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id: sessionId,
+      end_timestamp: new Date().toISOString(),
+      cycles_completed: cyclesCompleted,
+      duration_seconds: durationSeconds,
+      completed
+    }),
+  });
+};
+
+export const getBreathingPresets = async (userId: string) => {
+  return fetchApi<{ user_presets: BreathingPreset[]; builtin_presets: BreathingPreset[] }>(
+    `/breathing/presets?user_id=${userId}`
+  );
+};
+
+export const createBreathingPreset = async (
+  userId: string,
+  name: string,
+  techniqueId: string,
+  config: any
+) => {
+  return fetchApi('/breathing/presets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId, name, technique_id: techniqueId, config }),
+  });
+};
+
+export const deleteBreathingPreset = async (presetId: string) => {
+  return fetchApi(`/breathing/presets/${presetId}`, {
+    method: 'DELETE',
+  });
+};
+
+export const getBreathingTechniques = async () => {
+  return fetchApi<{ techniques: BreathingTechnique[] }>('/breathing/techniques');
+};
+

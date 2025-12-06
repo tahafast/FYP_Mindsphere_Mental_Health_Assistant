@@ -42,3 +42,54 @@ async def get_mood_history(user_id: str = Query(..., description="The ID of the 
     except Exception as e:
         print(f"Error fetching mood history: {e}")
         return []
+
+@router.get("/insights")
+async def get_user_insights(user_id: str = Query(..., description="The ID of the user")):
+    """Get weekly insights including check-in count and mood interpretation."""
+    if sentiment_collection is None:
+        return {
+            "check_in_count": 0,
+            "exercises_completed": 0,
+            "interpretation": "No data available yet. Start chatting to generate insights."
+        }
+    
+    try:
+        # Get data from last 7 days
+        from datetime import datetime, timedelta
+        week_ago = datetime.utcnow() - timedelta(days=7)
+        
+        cursor = sentiment_collection.find({
+            "user_id": user_id,
+            "timestamp": {"$gte": week_ago}
+        }).sort("timestamp", 1)
+        
+        logs = list(cursor)
+        check_in_count = len(logs)
+        
+        # Generate simple interpretation based on average sentiment
+        if check_in_count == 0:
+            interpretation = "No check-ins this week. Start a conversation to track your mood."
+        else:
+            avg_sentiment = sum(log.get("sentiment_score", 0.0) for log in logs) / check_in_count
+            
+            if avg_sentiment > 0.3:
+                interpretation = "Your mood has been positive this week. Keep up the great work!"
+            elif avg_sentiment > 0:
+                interpretation = "Your mood has been stable this week."
+            elif avg_sentiment > -0.3:
+                interpretation = "Your mood has been slightly low this week. Consider reaching out for support."
+            else:
+                interpretation = "Your mood has been challenging this week. Remember, it's okay to ask for help."
+        
+        return {
+            "check_in_count": check_in_count,
+            "exercises_completed": 0,  # Placeholder for future feature
+            "interpretation": interpretation
+        }
+    except Exception as e:
+        print(f"Error fetching insights: {e}")
+        return {
+            "check_in_count": 0,
+            "exercises_completed": 0,
+            "interpretation": "Unable to load insights at this time."
+        }
