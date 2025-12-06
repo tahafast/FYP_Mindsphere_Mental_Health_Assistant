@@ -90,75 +90,72 @@
 
 ## 🏗️ System Architecture
 
+```mermaid
+flowchart TB
+    subgraph Frontend["🖥️ FRONTEND (React + Vite + TypeScript)"]
+        direction TB
+        subgraph UI["User Interface Components"]
+            ChatUI["💬 Chat UI<br/>ChatPage, Sidebar, Messages"]
+            Dashboard["📊 Dashboard<br/>LEAS Graph, Overview, Insights"]
+            Breathing["🌬️ Breathing Modal<br/>Bubble, HUD, Controls"]
+            SafetyUI["🚨 Safety Alert UI<br/>Crisis Overlay, Emergency Contacts"]
+        end
+        API["📡 API Layer (api.ts)"]
+        UI --> API
+    end
+
+    subgraph Backend["⚡ FASTAPI BACKEND"]
+        direction TB
+        subgraph Endpoints["API Endpoints"]
+            ChatEndpoint["/chat<br/>Crisis Detection"]
+            SessionsEndpoint["/sessions<br/>CRUD + Auto-Title"]
+            MoodsEndpoint["/moods<br/>Log/Fetch Mood Data"]
+            BreathingEndpoint["/breathing<br/>Start/Stop, Presets"]
+        end
+        
+        subgraph Services["🧠 Service Layer"]
+            SafetyGuard["🛡️ SafetyGuard<br/>━━━━━━━━━━━━━<br/>SentenceTransformers<br/>all-MiniLM-L6-v2<br/>Prototype Clustering<br/>(0.72 threshold)"]
+            SentimentSvc["📈 SentimentService<br/>━━━━━━━━━━━━━<br/>J-Hartmann RoBERTa<br/>Sigmoid Smoothing<br/>Emotion→LEAS Mapping"]
+            RAGService["🤖 RAGService<br/>━━━━━━━━━━━━━<br/>MongoDB Atlas VectorSearch<br/>BM25 + Dense Ensemble<br/>FlashRank Reranker<br/>GPT-4o-mini"]
+        end
+        
+        Endpoints --> Services
+    end
+
+    subgraph Database["🗄️ MONGODB ATLAS"]
+        direction LR
+        Vectors[("📚 vectors<br/>knnVector Index<br/>(cosine similarity)")]
+        Sessions[("💾 chat_sessions<br/>session_id, title<br/>user_id")]
+        Sentiment[("📊 user_sentiment<br/>_metrics<br/>LEAS scores")]
+        MoodLogs[("😊 mood_logs<br/>Manual check-ins")]
+    end
+
+    API -->|"HTTP/JSON"| Backend
+    Services --> Database
+    
+    SafetyGuard -->|"Crisis Detected"| SafetyUI
+    SentimentSvc -->|"LEAS Score"| Dashboard
+    RAGService -->|"GPT Response"| ChatUI
+
+    style Frontend fill:#1a1a2e,stroke:#4ade80,stroke-width:2px
+    style Backend fill:#16213e,stroke:#60a5fa,stroke-width:2px
+    style Database fill:#0f3460,stroke:#f472b6,stroke-width:2px
+    style SafetyGuard fill:#7f1d1d,stroke:#ef4444,stroke-width:2px
+    style SentimentSvc fill:#1e3a5f,stroke:#3b82f6,stroke-width:2px
+    style RAGService fill:#14532d,stroke:#22c55e,stroke-width:2px
 ```
-┌──────────────────────────────────────────────────────────────────────────────────────┐
-│                              MINDSPHERE ARCHITECTURE                                  │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                      │
-│    ┌─────────────────────────────────────────────────────────────────────────────┐  │
-│    │                          FRONTEND (React + Vite)                            │  │
-│    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │  │
-│    │  │  Chat UI    │  │  Dashboard  │  │  Breathing  │  │  Safety Alert UI    │ │  │
-│    │  │             │  │  + LEAS     │  │  Modal      │  │  (Crisis Overlay)   │ │  │
-│    │  │  ChatPage   │  │  Graph      │  │             │  │                     │ │  │
-│    │  │  Sidebar    │  │  Overview   │  │  Bubble     │  │  "MEDICAL ALERT"    │ │  │
-│    │  │  Messages   │  │  Insights   │  │  HUD        │  │  Emergency Contacts │ │  │
-│    │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘ │  │
-│    │         │                │                │                    │            │  │
-│    │         └────────────────┴────────────────┴────────────────────┘            │  │
-│    │                                    │                                         │  │
-│    │                                    ▼                                         │  │
-│    │                          ┌─────────────────┐                                 │  │
-│    │                          │   API Layer     │                                 │  │
-│    │                          │   (api.ts)      │                                 │  │
-│    │                          └────────┬────────┘                                 │  │
-│    └───────────────────────────────────┼─────────────────────────────────────────┘  │
-│                                        │                                             │
-│                                        ▼                                             │
-│    ┌──────────────────── FASTAPI BACKEND ────────────────────────────────────────┐  │
-│    │                                                                              │  │
-│    │   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────────────┐ │  │
-│    │   │   /chat    │   │ /sessions  │   │  /moods    │   │    /breathing      │ │  │
-│    │   │            │   │            │   │            │   │                    │ │  │
-│    │   │ Crisis     │   │ CRUD +     │   │ Log/Fetch  │   │  Start/Stop        │ │  │
-│    │   │ Detection  │   │ Auto-Title │   │ Mood Data  │   │  Presets           │ │  │
-│    │   └─────┬──────┘   └────────────┘   └─────┬──────┘   └────────────────────┘ │  │
-│    │         │                                 │                                  │  │
-│    │         ▼                                 ▼                                  │  │
-│    │   ┌──────────────────────────────────────────────────────────────────────┐  │  │
-│    │   │                        SERVICE LAYER                                  │  │  │
-│    │   │                                                                       │  │  │
-│    │   │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐   │  │  │
-│    │   │  │  SafetyGuard    │  │  SentimentSvc   │  │    RAGService       │   │  │  │
-│    │   │  │                 │  │                 │  │                     │   │  │  │
-│    │   │  │ SentenceTransf. │  │  J-Hartmann     │  │  MongoDBAtlas       │   │  │  │
-│    │   │  │ all-MiniLM-L6   │  │  RoBERTa        │  │  VectorSearch       │   │  │  │
-│    │   │  │                 │  │                 │  │                     │   │  │  │
-│    │   │  │ Prototype       │  │  Sigmoid        │  │  BM25 + Dense       │   │  │  │
-│    │   │  │ Clustering      │  │  Smoothing      │  │  → Ensemble         │   │  │  │
-│    │   │  │ (0.72 thresh)   │  │                 │  │  → FlashRank        │   │  │  │
-│    │   │  │                 │  │  Emotion→LEAS   │  │  → GPT-4o-mini      │   │  │  │
-│    │   │  └────────┬────────┘  └────────┬────────┘  └──────────┬──────────┘   │  │  │
-│    │   │           │                    │                      │              │  │  │
-│    │   └───────────┴────────────────────┴──────────────────────┘              │  │  │
-│    │                                    │                                      │  │  │
-│    └────────────────────────────────────┼──────────────────────────────────────┘  │
-│                                         │                                         │
-│                                         ▼                                         │
-│    ┌────────────────────── MONGODB ATLAS ─────────────────────────────────────┐  │
-│    │                                                                           │  │
-│    │   ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────┐ │  │
-│    │   │    vectors    │  │ chat_sessions │  │user_sentiment │  │  mood_    │ │  │
-│    │   │               │  │               │  │   _metrics    │  │   logs    │ │  │
-│    │   │  knnVector    │  │  session_id   │  │               │  │           │ │  │
-│    │   │  index        │  │  title        │  │  LEAS scores  │  │  Manual   │ │  │
-│    │   │  (cosine)     │  │  user_id      │  │  over time    │  │  check-in │ │  │
-│    │   └───────────────┘  └───────────────┘  └───────────────┘  └───────────┘ │  │
-│    │                                                                           │  │
-│    └───────────────────────────────────────────────────────────────────────────┘  │
-│                                                                                    │
-└────────────────────────────────────────────────────────────────────────────────────┘
-```
+
+### Architecture Overview
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | React 18 + Vite + TypeScript | Modern SPA with real-time chat, LEAS visualization, and breathing exercises |
+| **API Layer** | FastAPI (Python 3.10+) | High-performance async API with automatic OpenAPI documentation |
+| **Safety Layer** | Sentence Transformers | Semantic crisis detection with 0.72 cosine similarity threshold |
+| **Sentiment Engine** | J-Hartmann RoBERTa | 7-emotion classification with confidence-aware LEAS mapping |
+| **RAG Pipeline** | LangChain + FlashRank | Hybrid BM25/Dense retrieval with cross-encoder reranking |
+| **LLM** | GPT-4o-mini | Empathetic response generation with dynamic persona switching |
+| **Database** | MongoDB Atlas | Vector store, session management, and longitudinal analytics |
 
 ---
 
