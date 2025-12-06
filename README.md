@@ -707,6 +707,8 @@ src/
 - Crisis overlay rendering
 - Message history with auto-scroll
 
+![Chat Interface](screenshots/chatpage.png)
+
 #### `MoodTrendChart.tsx`
 - Recharts LineChart with clinical zones
 - Reference area color-coding
