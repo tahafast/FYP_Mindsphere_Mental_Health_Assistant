@@ -173,51 +173,51 @@ The Safety Layer is the **highest-priority subsystem** in MindSphere. It interce
 │   User Message                                                     │
 │        │                                                           │
 │        ▼                                                           │
-│   ┌─────────────────────────────────────────┐                     │
-│   │      STEP 1: REGEX FAST-FAIL            │                     │
-│   │                                         │                     │
-│   │   Patterns:                             │                     │
-│   │   • "heart attack", "cardiac arrest"    │                     │
-│   │   • "chest pain|pressure|hurts"         │                     │
-│   │   • "can't breathe", "choking"          │                     │
-│   │   • "kill myself", "end it all"         │                     │
-│   │                                         │                     │
+│   ┌─────────────────────────────────────────┐                      │
+│   │      STEP 1: REGEX FAST-FAIL            │                      │
+│   │                                         │                      │
+│   │   Patterns:                             │                      │
+│   │   • "heart attack", "cardiac arrest"    │                      │
+│   │   • "chest pain|pressure|hurts"         │                      │
+│   │   • "can't breathe", "choking"          │                      │
+│   │   • "kill myself", "end it all"         │                      │
+│   │                                         │                      │
 │   │   Match found? ──────────────────────────────► CRISIS RESPONSE │
-│   │        │                                │                     │
-│   │        │ No match                       │                     │
-│   │        ▼                                │                     │
-│   └─────────────────────────────────────────┘                     │
+│   │        │                                │                      │
+│   │        │ No match                       │                      │
+│   │        ▼                                │                      │
+│   └─────────────────────────────────────────┘                      │
 │                                                                    │
-│   ┌─────────────────────────────────────────┐                     │
-│   │      STEP 2: SEMANTIC SIMILARITY        │                     │
-│   │                                         │                     │
-│   │   Model: all-MiniLM-L6-v2               │                     │
-│   │   (384-dim sentence embeddings)         │                     │
-│   │                                         │                     │
-│   │   Crisis Prototypes:                    │                     │
-│   │   ┌───────────────────────────────────┐ │                     │
-│   │   │ Cluster 1: Active Immediate Threat│ │                     │
-│   │   │  • "I want to die"                │ │                     │
-│   │   │  • "I am going to kill myself"    │ │                     │
-│   │   │  • "I have a plan to end my life" │ │                     │
-│   │   ├───────────────────────────────────┤ │                     │
-│   │   │ Cluster 2: Passive Ideation       │ │                     │
-│   │   │  • "I want to go to sleep..."     │ │                     │
-│   │   │  • "I wish I could disappear"     │ │                     │
-│   │   │  • "I don't want to exist"        │ │                     │
-│   │   ├───────────────────────────────────┤ │                     │
-│   │   │ Cluster 3: Perceived Burden       │ │                     │
-│   │   │  • "World better off without me"  │ │                     │
-│   │   │  • "I am a burden to everyone"    │ │                     │
-│   │   │  • "There is no point going on"   │ │                     │
-│   │   └───────────────────────────────────┘ │                     │
-│   │                                         │                     │
+│   ┌─────────────────────────────────────────┐                      │
+│   │      STEP 2: SEMANTIC SIMILARITY        │                      │
+│   │                                         │                      │
+│   │   Model: all-MiniLM-L6-v2               │                      │
+│   │   (384-dim sentence embeddings)         │                      │
+│   │                                         │                      │
+│   │   Crisis Prototypes:                    │                      │
+│   │   ┌───────────────────────────────────┐ │                      │
+│   │   │ Cluster 1: Active Immediate Threat│ │                      │
+│   │   │  • "I want to die"                │ │                      │
+│   │   │  • "I am going to kill myself"    │ │                      │ 
+│   │   │  • "I have a plan to end my life" │ │                      │
+│   │   ├───────────────────────────────────┤ │                      │
+│   │   │ Cluster 2: Passive Ideation       │ │                      │
+│   │   │  • "I want to go to sleep..."     │ │                      │
+│   │   │  • "I wish I could disappear"     │ │                      │ 
+│   │   │  • "I don't want to exist"        │ │                      │
+│   │   ├───────────────────────────────────┤ │                      │
+│   │   │ Cluster 3: Perceived Burden       │ │                      │ 
+│   │   │  • "World better off without me"  │ │                      │
+│   │   │  • "I am a burden to everyone"    │ │                      │
+│   │   │  • "There is no point going on"   │ │                      │
+│   │   └───────────────────────────────────┘ │                      │
+│   │                                         │                      │
 │   │   Cosine Similarity > 0.72? ─────────────────► CRISIS RESPONSE │
-│   │        │                                │                     │
-│   │        │ Below threshold                │                     │
-│   │        ▼                                │                     │
-│   │   PROCEED TO RAG PIPELINE               │                     │
-│   └─────────────────────────────────────────┘                     │
+│   │        │                                │                      │
+│   │        │ Below threshold                │                      │
+│   │        ▼                                │                      │
+│   │   PROCEED TO RAG PIPELINE               │                      │
+│   └─────────────────────────────────────────┘                      │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
@@ -276,48 +276,48 @@ All crisis events are logged to MongoDB with:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    SENTIMENT ANALYSIS PIPELINE                               │
+│                    SENTIMENT ANALYSIS PIPELINE                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   User Message                                                               │
-│        │                                                                     │
-│        ▼                                                                     │
+│                                                                             │
+│   User Message                                                              │
+│        │                                                                    │
+│        ▼                                                                    │
 │   ┌────────────────────────────────────────┐                                │
-│   │        TEXT PREPROCESSING               │                                │
-│   │                                         │                                │
+│   │        TEXT PREPROCESSING               │                               │
+│   │                                         │                               │
 │   │   • Capitalize standalone 'i' → 'I'    │                                │
-│   │   • Preserve formatting                 │                                │
-│   └────────────────┬────────────────────────┘                                │
-│                    │                                                         │
-│                    ▼                                                         │
+│   │   • Preserve formatting                 │                               │
+│   └────────────────┬────────────────────────┘                               │
+│                    │                                                        │
+│                    ▼                                                        │
 │   ┌────────────────────────────────────────┐                                │
 │   │    J-HARTMANN EMOTION ROBERTA          │                                │
-│   │                                         │                                │
+│   │                                         │                               │
 │   │   Model: j-hartmann/emotion-english-   │                                │
 │   │          distilroberta-base            │                                │
-│   │                                         │                                │
+│   │                                         │                               │
 │   │   Labels: anger | disgust | fear |     │                                │
 │   │           joy | neutral | sadness |    │                                │
 │   │           surprise                     │                                │
-│   │                                         │                                │
+│   │                                         │                               │
 │   │   Output: { label, confidence }        │                                │
-│   └────────────────┬────────────────────────┘                                │
-│                    │                                                         │
-│                    ▼                                                         │
+│   └────────────────┬────────────────────────┘                               │
+│                    │                                                        │
+│                    ▼                                                        │
 │   ┌────────────────────────────────────────┐                                │
-│   │       SIGMOID SMOOTHING                 │                                │
-│   │                                         │                                │
+│   │       SIGMOID SMOOTHING                 │                               │
+│   │                                         │                               │
 │   │   Formula: σ(x) = 1 / (1 + e^(-k(x-0.5)))                               │
 │   │   Where k = 10 (steepness)             │                                │
-│   │                                         │                                │
+│   │                                         │                               │
 │   │   Purpose: Prevent extreme jumps in    │                                │
-│   │   graph visualization                   │                                │
-│   └────────────────┬────────────────────────┘                                │
-│                    │                                                         │
-│                    ▼                                                         │
+│   │   graph visualization                   │                               │
+│   └────────────────┬────────────────────────┘                               │
+│                    │                                                        │
+│                    ▼                                                        │
 │   ┌────────────────────────────────────────┐                                │
-│   │    CONFIDENCE-AWARE DYNAMIC MAPPING     │                                │
-│   │                                         │                                │
+│   │    CONFIDENCE-AWARE DYNAMIC MAPPING     │                               │
+│   │                                         │                               │
 │   │   ┌─────────────────────────────────┐  │                                │
 │   │   │ joy (high conf > 0.75)          │  │                                │
 │   │   │   → +0.5 to +1.0 (Thriving)     │  │                                │
@@ -325,7 +325,7 @@ All crisis events are logged to MongoDB with:
 │   │   │ joy (low conf < 0.75)           │  │                                │
 │   │   │   → 0.0 to +0.4 (Stable)        │  │                                │
 │   │   ├─────────────────────────────────┤  │                                │
-│   │   │ neutral                          │  │                                │
+│   │   │ neutral                          │  │                               │
 │   │   │   → 0.0 (Baseline)              │  │                                │
 │   │   ├─────────────────────────────────┤  │                                │
 │   │   │ sadness (high conf)             │  │                                │
@@ -334,21 +334,20 @@ All crisis events are logged to MongoDB with:
 │   │   │ anger | fear | disgust          │  │                                │
 │   │   │   → -0.4 to -1.0 (High Distress)│  │                                │
 │   │   └─────────────────────────────────┘  │                                │
-│   │                                         │                                │
+│   │                                         │                               │
 │   │   Special: Neutral keyword override    │                                │
-│   │   ("just okay" → caps joy at 0.2)     │                                │
-│   └────────────────┬────────────────────────┘                                │
-│                    │                                                         │
-│                    ▼                                                         │
-│            ┌───────────────┐                                                 │
+│   │   ("just okay" → caps joy at 0.2)     │                                 │
+│   └────────────────┬────────────────────────┘                               │
+│                    │                                                        │
+│                    ▼                                                        │
+│            ┌───────────────┐                                                │
 │            │  LEAS SCORE   │  Final: -1.0 to +1.0                           │
-│            │  (persisted)  │                                                 │
-│            └───────┬───────┘                                                 │
-│                    │                                                         │
-│                    ▼                                                         │
-│           MongoDB Collection                                                 │
-│           "user_sentiment_metrics"                                           │
-│                                                                              │
+│            │  (persisted)  │                                                │
+│            └───────┬───────┘                                                │
+│                    │                                                        │
+│                    ▼                                                        │
+│           MongoDB Collection                                                │
+│                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -374,15 +373,15 @@ The frontend renders an interactive Recharts `LineChart` with:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                       RAG INTELLIGENCE PIPELINE                              │
+│                       RAG INTELLIGENCE PIPELINE                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   User Query                                                                 │
-│        │                                                                     │
-│        ▼                                                                     │
+│                                                                             │
+│   User Query                                                                │
+│        │                                                                    │
+│        ▼                                                                    │
 │   ┌─────────────────────────────────────────────┐                           │
-│   │            HYBRID RETRIEVAL                  │                           │
-│   │                                              │                           │
+│   │            HYBRID RETRIEVAL                  │                          │
+│   │                                              │                          │
 │   │   ┌────────────────┐   ┌────────────────┐   │                           │
 │   │   │  BM25 Retriever│   │ Dense Retriever│   │                           │
 │   │   │   (Keyword)    │   │   (Semantic)   │   │                           │
@@ -404,24 +403,24 @@ The frontend renders an interactive Recharts `LineChart` with:
 │   │           └─────────┬──────────┘            │                           │
 │   │                     │                       │                           │
 │   └─────────────────────┼───────────────────────┘                           │
-│                         │                                                    │
-│                         ▼                                                    │
+│                         │                                                   │
+│                         ▼                                                   │
 │   ┌─────────────────────────────────────────────┐                           │
-│   │           FLASHRANK RERANKER                 │                           │
-│   │                                              │                           │
+│   │           FLASHRANK RERANKER                 │                          │
+│   │                                              │                          │
 │   │   Model: ms-marco-MiniLM-L-12-v2            │                           │
-│   │                                              │                           │
+│   │                                              │                          │
 │   │   Purpose: Cross-encoder scoring for        │                           │
 │   │   relevance-based reordering                │                           │
-│   │                                              │                           │
+│   │                                              │                          │
 │   │   Output: Top contexts sorted by relevance  │                           │
 │   └─────────────────────┬───────────────────────┘                           │
-│                         │                                                    │
-│                         ▼                                                    │
+│                         │                                                   │
+│                         ▼                                                   │
 │   ┌─────────────────────────────────────────────┐                           │
-│   │         DYNAMIC PROMPT INJECTION             │                           │
-│   │                                              │                           │
-│   │   Base Template:                             │                           │
+│   │         DYNAMIC PROMPT INJECTION             │                          │
+│   │                                              │                          │
+│   │   Base Template:                             │                          │
 │   │   ┌────────────────────────────────────────┐│                           │
 │   │   │ ### IDENTITY & LIMITATIONS             ││                           │
 │   │   │ You are MindSphere, an advanced AI...  ││                           │
@@ -439,23 +438,23 @@ The frontend renders an interactive Recharts `LineChart` with:
 │   │   │ User: {question}                       ││                           │
 │   │   │ Dr. MindSphere:                        ││                           │
 │   │   └────────────────────────────────────────┘│                           │
-│   │                                              │                           │
-│   │   Tone Sections:                             │                           │
+│   │                                              │                          │
+│   │   Tone Sections:                             │                          │
 │   │   • DIRECTIVE  → fear/anger detected        │                           │
 │   │   • EMPATHETIC → sadness detected           │                           │
 │   │   • MOTIVATIONAL → joy/love detected        │                           │
 │   │   • DEFAULT → neutral                       │                           │
 │   └─────────────────────┬───────────────────────┘                           │
-│                         │                                                    │
-│                         ▼                                                    │
+│                         │                                                   │
+│                         ▼                                                   │
 │   ┌─────────────────────────────────────────────┐                           │
-│   │              GPT-4o-mini                     │                           │
-│   │                                              │                           │
-│   │   Temperature: 0.7                           │                           │
-│   │                                              │                           │
+│   │              GPT-4o-mini                     │                          │
+│   │                                              │                          │
+│   │   Temperature: 0.7                           │                          │
+│   │                                              │                          │
 │   │   → Empathetic, contextual response         │                           │
 │   └─────────────────────────────────────────────┘                           │
-│                                                                              │
+│                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -507,41 +506,41 @@ The Breathing Engine is a **complete frontend subsystem** with its own state mac
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    BREATHING ENGINE ARCHITECTURE                             │
+│                    BREATHING ENGINE ARCHITECTURE                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
+│                                                                             │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                     BreathingModal.jsx                               │   │
-│   │                     (Orchestrator)                                   │   │
-│   │                                                                      │   │
-│   │   Responsibilities:                                                  │   │
-│   │   • Preset selection (4-4-4 Box, 4-7-8, Resonant, Guided Slow)     │   │
+│   │                     BreathingModal.jsx                              │   │
+│   │                     (Orchestrator)                                  │   │
+│   │                                                                     │   │
+│   │   Responsibilities:                                                 │   │
+│   │   • Preset selection (4-4-4 Box, 4-7-8, Resonant, Guided Slow)      │   │
 │   │   • Duration configuration                                          │   │
 │   │   • Audio/Motion toggle persistence (localStorage)                  │   │
-│   │   • Backend session start/stop API calls                           │   │
+│   │   • Backend session start/stop API calls                            │   │
 │   │   • Coordinates all child components                                │   │
 │   └───────────────────────────┬─────────────────────────────────────────┘   │
-│                               │                                              │
+│                               │                                             │
 │           ┌───────────────────┼───────────────────┐                         │
 │           │                   │                   │                         │
 │           ▼                   ▼                   ▼                         │
-│   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐                │
-│   │BreathingStage │   │     HUD       │   │   Controls    │                │
-│   │               │   │               │   │               │                │
-│   │ • Container   │   │ • Step label  │   │ • Start/Pause │                │
-│   │   overflow    │   │   (Breathe In │   │ • Resume/Stop │                │
-│   │ • Background  │   │    /Hold/Out) │   │ • Reset       │                │
-│   │   gradient    │   │ • Countdown   │   │ • Audio toggle│                │
-│   │               │   │ • Elapsed     │   │ • Motion      │                │
-│   │   ┌───────┐   │   │ • Remaining   │   │   toggle      │                │
-│   │   │Bubble │   │   │ • Cycles      │   │               │                │
-│   │   │       │   │   │               │   │               │                │
-│   │   │ scale │   │   │ Color-coded   │   │ State-aware   │                │
-│   │   │  CSS  │   │   │ labels        │   │ button render │                │
-│   │   │       │   │   │               │   │               │                │
-│   │   └───────┘   │   └───────────────┘   └───────────────┘                │
+│   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐                 │
+│   │BreathingStage │   │     HUD       │   │   Controls    │                 │
+│   │               │   │               │   │               │                 │
+│   │ • Container   │   │ • Step label  │   │ • Start/Pause │                 │
+│   │   overflow    │   │   (Breathe In │   │ • Resume/Stop │                 │
+│   │ • Background  │   │    /Hold/Out) │   │ • Reset       │                 │
+│   │   gradient    │   │ • Countdown   │   │ • Audio toggle│                 │
+│   │               │   │ • Elapsed     │   │ • Motion      │                 │
+│   │   ┌───────┐   │   │ • Remaining   │   │   toggle      │                 │
+│   │   │Bubble │   │   │ • Cycles      │   │               │                 │
+│   │   │       │   │   │               │   │               │                 │
+│   │   │ scale │   │   │ Color-coded   │   │ State-aware   │                 │
+│   │   │  CSS  │   │   │ labels        │   │ button render │                 │
+│   │   │       │   │   │               │   │               │                 │
+│   │   └───────┘   │   └───────────────┘   └───────────────┘                 │
 │   └───────────────┘                                                         │
-│                                                                              │
+│                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -549,46 +548,46 @@ The Breathing Engine is a **complete frontend subsystem** with its own state mac
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│                    BREATHING ENGINE STATE FLOW                      │
+│                    BREATHING ENGINE STATE FLOW                     │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
-│      ┌───────────────────────────────────────────────────────┐    │
-│      │                                                        │    │
-│      │    ┌────────┐                                         │    │
-│      │    │  IDLE  │◄────────────────────────────────────┐   │    │
-│      │    └───┬────┘                                     │   │    │
-│      │        │ start(countdownSeconds)                  │   │    │
-│      │        ▼                                          │   │    │
-│      │    ┌────────────┐                                 │   │    │
-│      │    │ COUNTDOWN  │ ← 3... 2... 1...               │   │    │
-│      │    │            │                                 │   │    │
-│      │    │  Effect:   │                                 │   │    │
-│      │    │  setInterval(1s) decrements countdown       │   │    │
-│      │    └─────┬──────┘                                 │   │    │
-│      │          │ countdown === 0                        │   │    │
-│      │          ▼                                        │   │    │
-│      │    ┌────────────┐     pause()     ┌────────────┐ │   │    │
-│      │    │   ACTIVE   │◄───────────────►│  PAUSED    │ │   │    │
-│      │    │            │     resume()    │            │ │   │    │
-│      │    │  rAF Loop: │                 │  rAF       │ │   │    │
-│      │    │  • tick()  │                 │  stopped   │ │   │    │
-│      │    │  • 60fps   │                 │            │ │   │    │
-│      │    └─────┬──────┘                 └─────┬──────┘ │   │    │
-│      │          │                              │        │   │    │
-│      │          │ sessionDuration reached      │ stop() │   │    │
-│      │          │ OR stop()                    │        │   │    │
-│      │          ▼                              │        │   │    │
-│      │    ┌────────────┐◄─────────────────────┘        │   │    │
-│      │    │ COMPLETED  │                                │   │    │
-│      │    │            │                                │   │    │
-│      │    │  Display:  │                                │   │    │
-│      │    │  "X cycles │                                │   │    │
-│      │    │   in Y:ZZ" │                                │   │    │
-│      │    └─────┬──────┘                                │   │    │
-│      │          │ reset()                               │   │    │
-│      │          └───────────────────────────────────────┘   │    │
-│      │                                                        │    │
-│      └───────────────────────────────────────────────────────┘    │
+│      ┌───────────────────────────────────────────────────────┐     │
+│      │                                                       │     │
+│      │    ┌────────┐                                         │     │
+│      │    │  IDLE  │◄────────────────────────────────────┐   │     │
+│      │    └───┬────┘                                     │   │     │
+│      │        │ start(countdownSeconds)                  │   │     │
+│      │        ▼                                          │   │     │
+│      │    ┌────────────┐                                 │   │     │
+│      │    │ COUNTDOWN  │ ← 3... 2... 1...                │   │     │
+│      │    │            │                                 │   │     │
+│      │    │  Effect:   │                                 │   │     │
+│      │    │  setInterval(1s) decrements countdown        │   │     │
+│      │    └─────┬──────┘                                 │   │     │
+│      │          │ countdown === 0                        │   │     │
+│      │          ▼                                        │   │     │
+│      │    ┌────────────┐     pause()     ┌────────────┐  │   │     │
+│      │    │   ACTIVE   │◄───────────────►│  PAUSED    │  │   │     │
+│      │    │            │     resume()    │            │  │   │     │
+│      │    │  rAF Loop: │                 │  rAF       │  │   │     │
+│      │    │  • tick()  │                 │  stopped   │  │   │     │
+│      │    │  • 60fps   │                 │            │  │   │     │
+│      │    └─────┬──────┘                 └─────┬──────┘  │   │     │
+│      │          │                              │         │   │     │
+│      │          │ sessionDuration reached      │ stop()  │   │     │
+│      │          │ OR stop()                    │         │   │     │
+│      │          ▼                              │         │   │     │
+│      │    ┌────────────┐◄─────────────────────┘          │   │     │
+│      │    │ COMPLETED  │                                 │   │     │
+│      │    │            │                                 │   │     │
+│      │    │  Display:  │                                 │   │     │
+│      │    │  "X cycles │                                 │   │     │
+│      │    │   in Y:ZZ" │                                 │   │     │
+│      │    └─────┬──────┘                                 │   │     │
+│      │          │ reset()                                │   │     │
+│      │          └─────────────────────────────────────── ┘   │     │
+│      │                                                       │     │
+│      └───────────────────────────────────────────────────────┘     │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
@@ -614,22 +613,22 @@ The core hook (`useBreathingEngine.js`) manages:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    WEBAUDIO SIGNAL GRAPH                             │
+│                    WEBAUDIO SIGNAL GRAPH                            │
 ├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────┐ │
-│   │ Oscillator │───►│  LowPass   │───►│  GainNode  │───►│ Master │ │
-│   │   (sine)   │    │  Filter    │    │  (step)    │    │  Gain  │ │
-│   └────────────┘    └────────────┘    └────────────┘    └───┬────┘ │
-│                                                              │      │
-│   Step-specific parameters:                                  │      │
-│                                                              ▼      │
-│   INHALE: freq 80→200Hz, filter 400→1000Hz, gain 0.02→0.1  ●       │
-│   HOLD:   freq 100Hz, filter 500Hz, gain 0.03→0.05         AudioDestination
-│   EXHALE: freq 180→60Hz, filter 800→300Hz, gain 0.08→0.01         │
-│                                                                      │
+│                                                                     │
+│   ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────┐  │
+│   │ Oscillator │───►│  LowPass   │───►│  GainNode  │───►│ Master │  │
+│   │   (sine)   │    │  Filter    │    │  (step)    │    │  Gain  │  │
+│   └────────────┘    └────────────┘    └────────────┘    └───┬────┘  │
+│                                                             │       │
+│   Step-specific parameters:                                 │       │
+│                                                             ▼       │
+│   INHALE: freq 80→200Hz, filter 400→1000Hz, gain 0.02→0.1           │
+│   HOLD:   freq 100Hz, filter 500Hz, gain 0.03→0.05  AudioDestination|
+│   EXHALE: freq 180→60Hz, filter 800→300Hz, gain 0.08→0.01           │
+│                                                                     │
 │   Accessibility: reduceMotion = simple 440Hz chime                  │
-│                                                                      │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
