@@ -108,19 +108,19 @@ export function QuickSnapshots() {
                             variant="destructive"
                             size="sm"
                             className="w-full"
-                            onClick={() => window.location.href = 'tel:911'}
+                            onClick={() => window.location.href = 'tel:15'}
                         >
                             <Phone className="h-3 w-3 mr-2" />
-                            Call 911
+                            Call 15
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
                             className="w-full hover:bg-accent"
-                            onClick={() => window.location.href = 'tel:988'}
+                            onClick={() => window.location.href = 'tel:1122'}
                         >
                             <Phone className="h-3 w-3 mr-2" />
-                            Crisis Hotline: 988
+                            Rescue Hotline: 1122
                         </Button>
                     </CardContent>
                 </Card>
@@ -140,8 +140,7 @@ export function QuickSnapshots() {
                             variant="outline"
                             size="sm"
                             className="w-full hover:bg-accent"
-                            disabled
-                            title="Coming soon"
+                            onClick={() => navigate('/dashboard/recommendations')}
                         >
                             View Recommendations
                         </Button>

@@ -21,6 +21,7 @@ logger.info(f"Device set to use {device_name}")
 from app.services.sentiment import sentiment_service
 from app.core.prompts import PROMPT_DIRECTIVE, PROMPT_EMPATHETIC, PROMPT_MOTIVATIONAL, PROMPT_DEFAULT
 from app.services.safety_guard import safety_guard
+from app.services.safety_service import safety_event_service
 import json
 from app.api.v1.endpoints.sessions import generate_session_title
 
@@ -87,6 +88,19 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
             except Exception as e:
                 logger.error(f"❌ Error logging crisis: {e}")
         
+        # Log to safety_events collection for Safety Logs dashboard
+        try:
+            detected_trigger = user_input[:50].lower().strip()
+            await safety_event_service.log_event(
+                detected_trigger=detected_trigger,
+                leas_score=-1.0,
+                system_action="First Responder Protocol",
+                status="Resolved",
+                metadata={"detection_method": safety_result.get("detection_method", "unknown")}
+            )
+        except Exception as e:
+            logger.error(f"❌ Error logging safety event: {e}")
+        
         return ChatResponse(
             response=json.dumps(safety_result), # Send the full JSON payload as response string for frontend to parse
             sentiment_score=-1.0,
@@ -122,6 +136,18 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
                 logger.info("✅ Fear-crisis event logged successfully.")
             except Exception as e:
                 logger.error(f"❌ Error logging fear-crisis: {e}")
+        
+        # Log to safety_events collection for Safety Logs dashboard
+        try:
+            await safety_event_service.log_event(
+                detected_trigger="high fear response",
+                leas_score=sentiment_score,
+                system_action="First Responder Protocol",
+                status="Resolved",
+                metadata={"detection_method": "fear_threshold", "emotion_label": label}
+            )
+        except Exception as e:
+            logger.error(f"❌ Error logging safety event: {e}")
         
         safety_result = safety_guard.get_crisis_response()
         return ChatResponse(

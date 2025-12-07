@@ -72,6 +72,16 @@ export const getMoodHistory = async (userId: string): Promise<SentimentLog[]> =>
   return fetchApi<SentimentLog[]>(`/user/mood-history?user_id=${userId}`);
 };
 
+// Weekly Stats API
+export interface WeeklyStats {
+  check_ins: number;
+  exercises: number;
+}
+
+export const getWeeklyStats = async (userId: string): Promise<WeeklyStats> => {
+  return fetchApi<WeeklyStats>(`/user/stats/weekly?user_id=${userId}`);
+};
+
 // Knowledge Upload API
 export const uploadKnowledge = async (
   file: File,
@@ -465,4 +475,41 @@ export const getDailyRecommendation = async (
     url += `&refresh=true`;
   }
   return fetchApi<DailyRecommendation>(url);
+};
+
+// ============================================================================
+// Safety Logs APIs
+// ============================================================================
+
+export type SafetyStatus = 'Resolved' | 'Monitored' | 'Escalated';
+
+export interface SafetyEvent {
+  id: string;
+  timestamp: string;
+  detected_trigger: string;
+  leas_score: number;
+  system_action: string;
+  status: SafetyStatus;
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Get all safety events sorted by timestamp (newest first).
+ * Never cached for real-time accuracy.
+ */
+export const getSafetyLogs = async (): Promise<SafetyEvent[]> => {
+  return fetchApi<SafetyEvent[]>('/safety/logs');
+};
+
+/**
+ * Log a safety event (usually called from chat when crisis detected).
+ */
+export const logSafetyEvent = async (
+  event: Omit<SafetyEvent, 'id' | 'timestamp'>
+): Promise<SafetyEvent> => {
+  return fetchApi<SafetyEvent>('/safety/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(event)
+  });
 };

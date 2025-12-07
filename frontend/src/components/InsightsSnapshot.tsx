@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getUserInsights, getMoodHistory, UserInsights, SentimentLog } from "@/lib/api";
+import { getUserInsights, getMoodHistory, getWeeklyStats, UserInsights, SentimentLog, WeeklyStats } from "@/lib/api";
 import { TrendingUp, Loader2 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 
@@ -8,6 +8,7 @@ const USER_ID = "user123";
 
 export function InsightsSnapshot() {
     const [insights, setInsights] = useState<UserInsights | null>(null);
+    const [weeklyStats, setWeeklyStats] = useState<WeeklyStats | null>(null);
     const [sparklineData, setSparklineData] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -17,12 +18,14 @@ export function InsightsSnapshot() {
 
     const fetchInsights = async () => {
         try {
-            const [insightsData, moodHistory] = await Promise.all([
+            const [insightsData, moodHistory, stats] = await Promise.all([
                 getUserInsights(USER_ID),
-                getMoodHistory(USER_ID)
+                getMoodHistory(USER_ID),
+                getWeeklyStats(USER_ID)
             ]);
 
             setInsights(insightsData);
+            setWeeklyStats(stats);
 
             // Get last 7 days of sentiment scores for sparkline
             const weekAgo = new Date();
@@ -91,13 +94,13 @@ export function InsightsSnapshot() {
                         <div className="flex gap-4 mt-4">
                             <div>
                                 <p className="text-2xl font-bold text-primary">
-                                    {insights?.check_in_count || 0}
+                                    {weeklyStats?.check_ins ?? <Loader2 className="h-6 w-6 animate-spin inline" />}
                                 </p>
                                 <p className="text-xs text-muted-foreground">Check-ins</p>
                             </div>
                             <div>
                                 <p className="text-2xl font-bold text-primary">
-                                    {insights?.exercises_completed || 0}
+                                    {weeklyStats?.exercises ?? <Loader2 className="h-6 w-6 animate-spin inline" />}
                                 </p>
                                 <p className="text-xs text-muted-foreground">Exercises</p>
                             </div>

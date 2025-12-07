@@ -8,12 +8,15 @@ from datetime import datetime
 router = APIRouter()
 
 import certifi
+from datetime import timedelta
 
 if settings.MONGODB_URI:
     client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
     sentiment_collection = client[settings.MONGODB_DB_NAME]["user_sentiment_metrics"]
+    breathing_sessions_collection = client[settings.MONGODB_DB_NAME]["breathing_sessions"]
 else:
     sentiment_collection = None
+    breathing_sessions_collection = None
 
 class SentimentLog(BaseModel):
     user_id: str
@@ -92,4 +95,45 @@ async def get_user_insights(user_id: str = Query(..., description="The ID of the
             "check_in_count": 0,
             "exercises_completed": 0,
             "interpretation": "Unable to load insights at this time."
+        }
+
+@router.get("/stats/weekly")
+async def get_weekly_stats(user_id: str = Query(..., description="The ID of the user")):
+    """
+    Get weekly statistics including check-ins and breathing exercises count.
+    
+    Returns:
+        JSON with check_ins and exercises counts from the last 7 days
+    """
+    if sentiment_collection is None or breathing_sessions_collection is None:
+        return {
+            "check_ins": 0,
+            "exercises": 0
+        }
+    
+    try:
+        # Calculate start date for last 7 days
+        start_date = datetime.utcnow() - timedelta(days=7)
+        
+        # Count check-ins (sentiment logs) from last 7 days
+        check_ins = sentiment_collection.count_documents({
+            "user_id": user_id,
+            "timestamp": {"$gte": start_date}
+        })
+        
+        # Count breathing exercises from last 7 days
+        exercises = breathing_sessions_collection.count_documents({
+            "user_id": user_id,
+            "start_timestamp": {"$gte": start_date}
+        })
+        
+        return {
+            "check_ins": check_ins,
+            "exercises": exercises
+        }
+    except Exception as e:
+        print(f"Error fetching weekly stats: {e}\")")
+        return {
+            "check_ins": 0,
+            "exercises": 0
         }
