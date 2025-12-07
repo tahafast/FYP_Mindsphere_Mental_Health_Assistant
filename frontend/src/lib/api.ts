@@ -282,3 +282,142 @@ export const getBreathingTechniques = async () => {
   return fetchApi<{ techniques: BreathingTechnique[] }>('/breathing/techniques');
 };
 
+// ============================================================================
+// Journal APIs
+// ============================================================================
+
+export type MoodType = 'sad' | 'neutral' | 'happy' | 'great' | 'anxious';
+export type SentimentType = 'positive' | 'neutral' | 'negative' | 'mixed';
+export type CrisisLevel = 'none' | 'low' | 'medium' | 'high';
+export type SuggestionType = 'affirmation' | 'coping' | 'action' | 'gratitude';
+
+export interface AISuggestion {
+  suggestion: string;
+  type: SuggestionType;
+}
+
+export interface Journal {
+  id: string;
+  user_id: string;
+  date_iso: string;
+  content: string;
+  mood?: MoodType;
+  tags: string[];
+  summary?: string;
+  sentiment?: SentimentType;
+  ai_suggestion?: AISuggestion;
+  crisis_level: CrisisLevel;
+  created_at: string;
+  updated_at: string;
+  is_today: boolean;
+  allow_training?: boolean; // Whether entry was opted-in for training
+}
+
+export interface JournalCreate {
+  content: string;
+  mood?: MoodType;
+  local_date?: string;
+  allow_training?: boolean;
+}
+
+export interface JournalCalendarDay {
+  date_iso: string;
+  has_entry: boolean;
+  mood?: MoodType;
+}
+
+export interface JournalCalendarResponse {
+  month: string;
+  days: JournalCalendarDay[];
+}
+
+export interface JournalSearchResult {
+  id: string;
+  date_iso: string;
+  summary?: string;
+  relevance_score: number;
+}
+
+export interface JournalTagCount {
+  tag: string;
+  count: number;
+}
+
+// Create or update today's journal
+export const createOrUpdateJournal = async (
+  userId: string,
+  data: JournalCreate
+): Promise<Journal> => {
+  return fetchApi<Journal>(`/journal?user_id=${userId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+};
+
+// Get journals in date range
+export const getJournals = async (
+  userId: string,
+  start?: string,
+  end?: string
+): Promise<Journal[]> => {
+  let url = `/journal?user_id=${userId}`;
+  if (start) url += `&start=${start}`;
+  if (end) url += `&end=${end}`;
+  return fetchApi<Journal[]>(url);
+};
+
+// Get single journal by ID
+export const getJournal = async (userId: string, journalId: string): Promise<Journal> => {
+  return fetchApi<Journal>(`/journal/${journalId}?user_id=${userId}`);
+};
+
+// Delete journal
+export const deleteJournal = async (userId: string, journalId: string): Promise<void> => {
+  await fetchApi(`/journal/${journalId}?user_id=${userId}`, { method: 'DELETE' });
+};
+
+// Get calendar markers for a month
+export const getJournalCalendar = async (
+  userId: string,
+  month: string
+): Promise<JournalCalendarResponse> => {
+  return fetchApi<JournalCalendarResponse>(`/journal/calendar?user_id=${userId}&month=${month}`);
+};
+
+// Search journals
+export const searchJournals = async (
+  userId: string,
+  query: string,
+  limit: number = 10
+): Promise<JournalSearchResult[]> => {
+  return fetchApi<JournalSearchResult[]>(`/journal/search?user_id=${userId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, limit }),
+  });
+};
+
+// Export journal as text (returns blob URL)
+export const exportJournal = async (userId: string, journalId: string): Promise<string> => {
+  const response = await fetch(`${API_BASE_URL}/journal/export/${journalId}?user_id=${userId}`);
+  if (!response.ok) throw new Error('Export failed');
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+};
+
+// Get recent journal tags with counts
+export const getRecentJournalTags = async (
+  userId: string,
+  limit: number = 20
+): Promise<JournalTagCount[]> => {
+  return fetchApi<JournalTagCount[]>(`/journal/tags/recent?user_id=${userId}&limit=${limit}`);
+};
+
+// Search journals by tag
+export const searchJournalsByTag = async (
+  userId: string,
+  tag: string
+): Promise<Journal[]> => {
+  return fetchApi<Journal[]>(`/journal?user_id=${userId}&tag=${encodeURIComponent(tag)}`);
+};

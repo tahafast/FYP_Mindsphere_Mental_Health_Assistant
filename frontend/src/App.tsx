@@ -11,6 +11,7 @@ import Overview from "./pages/Overview";
 import Personalization from "./pages/Personalization";
 import Recommendations from "./pages/Recommendations";
 import SafetyLogs from "./pages/SafetyLogs";
+import JournalPage from "./pages/JournalPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/dashboard/personalization" element={<DashboardLayout><Personalization /></DashboardLayout>} />
               <Route path="/dashboard/recommendations" element={<DashboardLayout><Recommendations /></DashboardLayout>} />
               <Route path="/dashboard/safety-logs" element={<DashboardLayout><SafetyLogs /></DashboardLayout>} />
+              <Route path="/dashboard/journal" element={<DashboardLayout><JournalPage /></DashboardLayout>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -5,6 +5,7 @@ import { getTodaysMood, TodaysMood } from "@/lib/api";
 import { MessageSquarePlus, Play, BookOpen, Wind, Phone, AlertCircle, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BreathingModal } from "@/components/breathing";
+import { JournalModal } from "@/components/journal";
 import "@/styles/breathing.css";
 
 const USER_ID = "user123";
@@ -12,6 +13,7 @@ const USER_ID = "user123";
 export function QuickSnapshots() {
     const [todaysMood, setTodaysMood] = useState<TodaysMood | null>(null);
     const [showBreathingModal, setShowBreathingModal] = useState(false);
+    const [showJournalModal, setShowJournalModal] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -76,8 +78,7 @@ export function QuickSnapshots() {
                             variant="ghost"
                             size="sm"
                             className="w-full justify-start hover:bg-accent"
-                            disabled
-                            title="Coming soon"
+                            onClick={() => setShowJournalModal(true)}
                         >
                             <BookOpen className="h-3 w-3 mr-2" />
                             Reflection Journal
@@ -152,6 +153,12 @@ export function QuickSnapshots() {
             <BreathingModal
                 isOpen={showBreathingModal}
                 onClose={() => setShowBreathingModal(false)}
+            />
+
+            {/* Journal Modal */}
+            <JournalModal
+                isOpen={showJournalModal}
+                onClose={() => setShowJournalModal(false)}
             />
         </>
     );
