@@ -421,3 +421,48 @@ export const searchJournalsByTag = async (
 ): Promise<Journal[]> => {
   return fetchApi<Journal[]>(`/journal?user_id=${userId}&tag=${encodeURIComponent(tag)}`);
 };
+
+// ============================================================================
+// Recommendations APIs
+// ============================================================================
+
+export interface TrendPoint {
+  date: string;
+  score: number;
+}
+
+export type StatusLabel = 'Calm' | 'Stable' | 'Mixed' | 'Elevated' | 'Anxious';
+
+export interface DailyRecommendation {
+  daily_digest_title: string;
+  emotional_summary: string;
+  suggestion_for_today: string;
+  average_leas_score: number;
+  status_label: StatusLabel;
+  trend_points: TrendPoint[];
+}
+
+/**
+ * Get emotionally intelligent daily recommendation based on recent LEAS scores.
+ * 
+ * @param userId - The authenticated user's ID
+ * @param windowDays - Number of days to analyze (default: 3)
+ * @param userTz - Optional user timezone string
+ * @param refresh - Force refresh (bypass cache)
+ * @returns Promise<DailyRecommendation>
+ */
+export const getDailyRecommendation = async (
+  userId: string,
+  windowDays: number = 3,
+  userTz?: string,
+  refresh: boolean = false
+): Promise<DailyRecommendation> => {
+  let url = `/recommendations/daily?user_id=${userId}&window_days=${windowDays}`;
+  if (userTz) {
+    url += `&user_tz=${encodeURIComponent(userTz)}`;
+  }
+  if (refresh) {
+    url += `&refresh=true`;
+  }
+  return fetchApi<DailyRecommendation>(url);
+};
