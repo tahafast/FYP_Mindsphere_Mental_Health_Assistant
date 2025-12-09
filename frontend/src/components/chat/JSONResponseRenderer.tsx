@@ -220,7 +220,7 @@ function MarkdownRenderer({ markdown }: { markdown: string }) {
                     ),
                     // Ordered lists (action steps)
                     ol: ({ children }) => (
-                        <ol className="space-y-3 my-3 rounded-xl bg-gradient-to-br from-emerald-900/20 to-teal-900/10 border border-emerald-500/20 p-4">
+                        <ol className="ms-block space-y-3 my-3 rounded-xl bg-gradient-to-br from-emerald-900/20 to-teal-900/10 border border-emerald-500/20 p-4">
                             {children}
                         </ol>
                     ),
@@ -335,7 +335,7 @@ function LegacyTherapeuticCard({ response }: { response: LegacyTherapeuticRespon
 
             {/* What I Heard */}
             {response.what_i_heard && response.what_i_heard.length > 0 && (
-                <div className="rounded-xl bg-slate-800/50 border border-emerald-500/20 p-4">
+                <div className="ms-block rounded-xl bg-slate-800/50 border border-emerald-500/20 p-4">
                     <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold mb-3">
                         <span className="text-lg">💬</span>
                         <span>What I Heard</span>
@@ -361,7 +361,7 @@ function LegacyTherapeuticCard({ response }: { response: LegacyTherapeuticRespon
 
             {/* Action Steps */}
             {response.action_steps && response.action_steps.length > 0 && (
-                <div className="mt-4 rounded-xl bg-gradient-to-br from-emerald-900/20 to-teal-900/10 border border-emerald-500/20 p-4">
+                <div className="ms-block mt-4 rounded-xl bg-gradient-to-br from-emerald-900/20 to-teal-900/10 border border-emerald-500/20 p-4">
                     <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold mb-4">
                         <span className="text-lg">🧭</span>
                         <span>Action Steps</span>

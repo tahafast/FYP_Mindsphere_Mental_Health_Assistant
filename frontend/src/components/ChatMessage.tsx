@@ -82,7 +82,7 @@ function BeautifulMarkdownRenderer({ markdown }: { markdown: string }) {
           ),
           // Ordered lists (action steps)
           ol: ({ children }) => (
-            <ol className="space-y-3 my-3 rounded-xl bg-gradient-to-br from-emerald-900/20 to-teal-900/10 border border-emerald-500/20 p-4">
+            <ol className="ms-block space-y-3 my-3 rounded-xl bg-gradient-to-br from-emerald-900/20 to-teal-900/10 border border-emerald-500/20 p-4">
               {children}
             </ol>
           ),
@@ -168,7 +168,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     if (markdown && markdown.length > 0) {
       return (
         <div className="flex justify-start mb-4 animate-fade-in-up">
-          <div className="max-w-[85%] rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-emerald-500/20 p-5 shadow-lg">
+          <div className="mindsphere-ai-response max-w-[85%] rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-emerald-500/20 p-5 shadow-lg">
             <BeautifulMarkdownRenderer markdown={markdown} />
             <p className="text-xs text-emerald-500/50 mt-4 pt-3 border-t border-emerald-500/10">
               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -181,7 +181,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     // Otherwise use full JSONResponseRenderer for legacy formats
     return (
       <div className="flex justify-start mb-4 animate-fade-in-up">
-        <div className="max-w-[85%] rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-emerald-500/20 p-5 shadow-lg">
+        <div className="mindsphere-ai-response max-w-[85%] rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-emerald-500/20 p-5 shadow-lg">
           <JSONResponseRenderer content={message.content} isBot={true} />
           <p className="text-xs text-emerald-500/50 mt-4 pt-3 border-t border-emerald-500/10">
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -197,7 +197,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div
         className={`max-w-[80%] rounded-xl p-4 shadow-md ${isUser
           ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 text-white'
-          : 'bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-emerald-500/20 text-gray-100'
+          : 'mindsphere-ai-response bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-emerald-500/20 text-gray-100'
           }`}
       >
         <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>

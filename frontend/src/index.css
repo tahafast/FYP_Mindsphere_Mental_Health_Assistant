@@ -164,3 +164,73 @@ All colors MUST be HSL.
 .animate-fade-in-up {
   animation: fade-in-up 0.4s ease-out;
 }
+
+/* ========================================
+   MindSphere AI Response Styling
+   ======================================== */
+
+/* Base AI Response - Reduced font size */
+.mindsphere-ai-response {
+  font-size: 0.875rem; /* Reduced from 1rem to match input size better */
+  line-height: 1.35rem;
+}
+
+/* Headings inside AI response */
+.mindsphere-ai-response h1,
+.mindsphere-ai-response h2,
+.mindsphere-ai-response h3 {
+  font-size: 0.95rem;
+}
+
+/* DARK MODE - Beautiful green-accent card */
+.dark .mindsphere-ai-response {
+  background: #0f1b1d; /* Deep dark surface */
+  border-left: 3px solid #2dd4bf; /* Teal-green accent */
+}
+
+/* LIGHT MODE - Soft white card with green accents */
+.light .mindsphere-ai-response {
+  background: #ffffffee; /* Soft translucent white */
+  border-left: 3px solid #22c55e; /* Green accent for light theme */
+  color: #1a1a1a; /* Readable dark text on light background */
+}
+
+/* Light mode - Make all text darker for readability */
+.light .mindsphere-ai-response p,
+.light .mindsphere-ai-response span,
+.light .mindsphere-ai-response li {
+  color: #1a1a1a !important; /* Dark text for body content */
+}
+
+.light .mindsphere-ai-response .text-gray-100,
+.light .mindsphere-ai-response .text-gray-200,
+.light .mindsphere-ai-response .text-gray-300,
+.light .mindsphere-ai-response .text-gray-400 {
+  color: #2d2d2d !important; /* Darker grey for secondary text */
+}
+
+/* Light mode headings stay dark but slightly softer */
+.light .mindsphere-ai-response h1,
+.light .mindsphere-ai-response h2,
+.light .mindsphere-ai-response h3 {
+  color: #0a0a0a !important;
+}
+
+/* Light mode nested boxes (What I Heard, Action Steps, etc) */
+.light .mindsphere-ai-response .ms-block {
+  background: #f1f5f9; /* Slate-100 */
+  border-color: #86efac; /* Green-300 */
+}
+
+/* Light mode nested box text */
+.light .mindsphere-ai-response .ms-block p,
+.light .mindsphere-ai-response .ms-block span,
+.light .mindsphere-ai-response .ms-block li {
+  color: #1a1a1a !important;
+}
+
+/* Dark mode nested boxes - keep existing dark styling */
+.dark .mindsphere-ai-response .ms-block {
+  background: rgba(15, 27, 29, 0.5);
+  border-color: rgba(45, 212, 191, 0.2);
+}

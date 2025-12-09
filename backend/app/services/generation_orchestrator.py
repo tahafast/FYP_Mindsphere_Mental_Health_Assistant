@@ -476,7 +476,7 @@ Your entire output must be valid JSON ONLY. No text before or after."""
             return cached
         
         # Check if we should use greeting template instead of therapeutic template
-        if self._should_use_greeting_template(metadata):
+        if self._should_use_greeting_template(metadata, original_text):
             logger.info("👋 Using minimal greeting template")
             greeting_response = get_greeting_response()
             return json.dumps(greeting_response)
@@ -598,33 +598,43 @@ Generate your response following the dynamic response logic based on intent."""
         
         return "Emotional Summary"
     
-    def _should_use_greeting_template(self, metadata: Dict[str, Any]) -> bool:
-        """Check if we should use minimal greeting template instead of therapeutic template."""
-        intent_type = metadata.get("intent_type", "initial_share")
-        emotion_estimate = metadata.get("emotion_estimate", "neutral").lower()
-        short_phrases = metadata.get("short_phrases", [])
+    def _is_substantive(self, user_text: str) -> bool:
+        """
+        Check if user input is substantive (not a short greeting).
         
-        # Rule 1: If intent is explicitly greeting
-        if intent_type == "greeting":
+        # This fallback is used ONLY when Stage A did not successfully extract intent.
+        # It ensures that long emotional paragraphs never map to greeting templates.
+        """
+        return len(user_text) > 120 or len(user_text.split()) > 12
+    
+    def _should_use_greeting_template(self, metadata: Dict[str, Any], user_text: str = "") -> bool:
+        """
+        Check if we should use minimal greeting template instead of therapeutic template.
+        
+        Uses INTENT-FIRST logic:
+        - Stage A intent takes priority over sentiment-based detection
+        - Only use greeting for explicit greeting/smalltalk intents
+        - Substantive shares with positive sentiment get therapeutic template
+        """
+        intent_type = metadata.get("intent_type", "initial_share")
+        
+        # INTENT-FIRST: Only use greeting template if intent is explicitly greeting/smalltalk
+        if intent_type in ("greeting", "smalltalk"):
+            logger.info(f"👋 Using greeting template: intent={intent_type}")
             return True
         
-        # Rule 2: If sentiment is joy or neutral AND no distress phrases detected
-        non_distress_emotions = ["joy", "neutral", "calm", "positive", "grateful", "hopeful"]
-        distress_keywords = [
-            "stress", "anxiety", "fear", "panic", "overwhelm", "depress", 
-            "sad", "hurt", "pain", "crisis", "self-harm", "suicide",
-            "angry", "guilt", "shame", "lonely", "worried"
-        ]
+        # If intent is substantive (initial_share, follow_up, crisis, question, etc.), 
+        # do NOT use greeting template - regardless of positive sentiment
+        if intent_type in ("initial_share", "follow_up", "crisis", "question", "clarify", "acknowledgment"):
+            logger.info(f"📝 Using therapeutic template: intent={intent_type} (not greeting)")
+            return False
         
-        if emotion_estimate in non_distress_emotions:
-            # Check if any distress phrases are present
-            all_phrases_text = " ".join(short_phrases).lower()
-            has_distress = any(keyword in all_phrases_text for keyword in distress_keywords)
-            
-            if not has_distress:
-                logger.info(f"🎯 Using greeting template: emotion={emotion_estimate}, no distress detected")
-                return True
+        # Fallback for None/unknown intent: check if message is substantive
+        if user_text and self._is_substantive(user_text):
+            logger.info(f"📝 Using therapeutic template: substantive text detected ({len(user_text)} chars)")
+            return False
         
+        # Default to therapeutic template for safety
         return False
     
     def _get_stage_b_prompt(self, persona: str, intent_type: str = "initial_share") -> str:
