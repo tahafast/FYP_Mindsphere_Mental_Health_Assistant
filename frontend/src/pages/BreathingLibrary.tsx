@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getBreathingTechniques, BreathingTechnique } from "@/lib/api";
 import { Wind, Check } from "lucide-react";
-import { BreathingExercise } from "@/components/BreathingExercise";
+import { BreathingExercise } from "@/components/breathing";
 
 export function BreathingLibrary() {
     const [techniques, setTechniques] = useState<BreathingTechnique[]>([]);
