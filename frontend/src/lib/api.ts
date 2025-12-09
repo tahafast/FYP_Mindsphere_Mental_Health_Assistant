@@ -1,4 +1,4 @@
-// API Layer - Connected to Backend
+﻿// API Layer - Connected to Backend
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 export interface Message {
@@ -7,6 +7,7 @@ export interface Message {
   content: string;
   timestamp: Date;
   isCrisis?: boolean;
+  content_type?: 'text' | 'markdown' | 'json';
 }
 
 export interface ChatSession {
@@ -26,6 +27,7 @@ export interface ChatResponse {
   sentiment_score: number;
   sentiment_label: string;
   crisis_detected: boolean;
+  content_type?: "text" | "markdown" | "json";
 }
 
 export interface SentimentLog {
@@ -513,3 +515,4 @@ export const logSafetyEvent = async (
     body: JSON.stringify(event)
   });
 };
+

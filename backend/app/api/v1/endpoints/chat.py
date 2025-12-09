@@ -22,6 +22,7 @@ from app.services.sentiment import sentiment_service
 from app.core.prompts import PROMPT_DIRECTIVE, PROMPT_EMPATHETIC, PROMPT_MOTIVATIONAL, PROMPT_DEFAULT
 from app.services.safety_guard import safety_guard
 from app.services.safety_service import safety_event_service
+from app.services.generation_orchestrator import orchestrator
 import json
 from app.api.v1.endpoints.sessions import generate_session_title
 
@@ -38,6 +39,7 @@ class ChatResponse(BaseModel):
     sentiment_score: float
     sentiment_label: str
     crisis_detected: bool = False
+    content_type: str = "text"  # "text" or "markdown"
 
 import certifi
 
@@ -171,6 +173,36 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     else:
         logger.info("🎯 Selected DEFAULT tone")
     
+    # 2.5. Stage A Extraction (Fast metadata extraction)
+    logger.info("🔍 Running Stage A extraction...")
+    try:
+        stage_a_metadata = await orchestrator.stage_a_extract(
+            user_id=request.user_id,
+            text=user_input,
+            context={
+                "session_id": session_id,
+                "sentiment_score": sentiment_score,
+                "sentiment_label": label,
+                "tone_section": tone_section
+            }
+        )
+        logger.info(f"✅ Stage A complete: verbosity={stage_a_metadata.get('verbosity_hint')}, topics={stage_a_metadata.get('topics')}")
+        
+        # Check if Stage A flagged additional safety concerns
+        if stage_a_metadata.get("safety_flag") and sentiment_score < -0.5:
+            logger.warning(f"⚠️ Stage A elevated concern flag with negative sentiment")
+            # Could trigger additional safety protocols here if needed
+    except Exception as e:
+        logger.error(f"❌ Stage A extraction failed: {e}")
+        # Default metadata if extraction fails
+        stage_a_metadata = {
+            "must_echo": [],
+            "topics": [],
+            "emotion_scores": {},
+            "verbosity_hint": "medium",
+            "safety_flag": False
+        }
+    
     # 3. LEAS Logging
     if sentiment_collection is not None:
         try:
@@ -187,14 +219,75 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
         except Exception as e:
             logger.error(f"❌ Error logging sentiment: {e}")
     
-    # 4. RAG Generation
-    logger.info("🤖 Generating RAG response...")
+    # 4. Stage A/B Generation (Orchestrated)
+    logger.info("🤖 Determining generation strategy...")
+    content_type = "text"  # Default to plain text
+    
     try:
-        response_text = await rag_service.generate_response(user_input, tone_section=tone_section)
-        logger.info(f"✅ RAG response generated ({len(response_text)} chars)")
+        # Determine persona (default to therapist for now, could be user preference)
+        persona = "therapist"
+        
+        # Check if we should use Stage B (GPT-4o) or deterministic template
+        use_stage_b = orchestrator.should_call_stage_b(
+            metadata=stage_a_metadata,
+            persona=persona,
+            user_request=user_input
+        )
+        
+        if use_stage_b:
+            logger.info("🎨 Using Stage B (GPT-4o) generation")
+            
+            # Retrieve context docs for Stage B (therapist/high intensity only)
+            context_docs = None
+            intensity = stage_a_metadata.get("intensity", "medium")
+            if persona == "therapist" or intensity == "high":
+                try:
+                    context_docs = await rag_service.get_context_for_stage_b(
+                        query=user_input,
+                        persona=persona,
+                        verbosity_hint=intensity  # Using intensity as verbosity hint
+                    )
+                    if context_docs:
+                        logger.info(f"📚 Retrieved {len(context_docs)} context docs")
+                except Exception as ctx_err:
+                    logger.warning(f"⚠️ Context retrieval failed: {ctx_err}")
+                    context_docs = None
+            
+            response_text = await orchestrator.stage_b_generate(
+                user_id=request.user_id,
+                original_text=user_input,
+                metadata=stage_a_metadata,
+                persona=persona,
+                context={
+                    "tone_section": tone_section,
+                    "sentiment_score": sentiment_score,
+                    "sentiment_label": label
+                },
+                context_docs=context_docs
+            )
+            content_type = "json"  # Stage B returns JSON format
+        else:
+            logger.info("⚡ Using deterministic template (cost-optimized)")
+            response_text = orchestrator.get_deterministic_response(
+                metadata=stage_a_metadata,
+                persona=persona
+            )
+            content_type = "json"  # Deterministic templates return JSON too
+        
+        logger.info(f"✅ Response generated ({len(response_text)} chars, type={content_type})")
+        
     except Exception as e:
-        logger.error(f"❌ Error generating response: {str(e)}")
-        response_text = "I apologize, but I'm having trouble processing your message right now. Please try again."
+        logger.error(f"❌ Error in orchestrator generation: {str(e)}")
+        logger.info("🔄 Falling back to RAG service...")
+        try:
+            # Fallback to original RAG if orchestrator fails
+            response_text = await rag_service.generate_response(user_input, tone_section=tone_section)
+            content_type = "text"
+            logger.info(f"✅ RAG fallback successful ({len(response_text)} chars)")
+        except Exception as e2:
+            logger.error(f"❌ RAG fallback also failed: {str(e2)}")
+            response_text = "I apologize, but I'm having trouble processing your message right now. Please try again."
+            content_type = "text"
     
     # 5. Save Chat History
     if chat_histories_collection is not None:
@@ -222,5 +315,6 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
         response=response_text,
         sentiment_score=sentiment_score,
         sentiment_label=label,
-        crisis_detected=False
+        crisis_detected=False,
+        content_type=content_type
     )

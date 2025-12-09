@@ -118,13 +118,14 @@ const Chat = () => {
           duration: 5000,
         });
       } else {
-        // Standard response
+        // Standard response - include content_type from backend
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content: response.response,
           timestamp: new Date(),
           isCrisis: false,
+          content_type: response.content_type || 'text',
         };
         setMessages(prev => [...prev, aiMessage]);
       }
