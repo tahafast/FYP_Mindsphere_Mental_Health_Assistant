@@ -507,6 +507,9 @@ Your entire output must be valid JSON ONLY. No text before or after."""
                 context_section = "\n\n".join(context_snippets)
                 logger.info(f"📚 Injecting {len(context_docs)} context docs into Stage B")
             
+            # Build context string separately to avoid f-string backslash issue
+            context_line = f"Therapeutic Context (use naturally, do not cite):\n{context_section}" if context_section else ""
+            
             # Unified user message with Stage-A metadata
             user_content = f"""User message: "{original_text}"
 
@@ -517,7 +520,7 @@ Stage-A Metadata:
 - short_phrases: {short_phrases}
 - safety_flag: {metadata.get('safety_flag', False)}
 
-{f'Therapeutic Context (use naturally, do not cite):\\n{context_section}' if context_section else ''}
+{context_line}
 
 Generate your response following the dynamic response logic based on intent."""
             
