@@ -1,6 +1,3 @@
-# MindSphere Backend - Fly.io Configuration
-# Updated for Fly Machines (v2)
-
 app = "mindsphere-mental-health-assistant"
 primary_region = "sin"
 
@@ -9,24 +6,34 @@ primary_region = "sin"
 [env]
   PORT = "8080"
 
-[http_service]
+[[services]]
   internal_port = 8080
-  force_https = true
-  auto_stop_machines = "stop"
-  auto_start_machines = true
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "requests"
+    soft_limit = 50
+    hard_limit = 100
+
+# Disable autoscaling + ensure a SINGLE VM because free tier cannot run 2
+[deploy]
+  strategy = "immediate"
+
+[machines]
+  auto_start = true
+  auto_stop = true
   min_machines_running = 1
-  processes = ["app"]
+  max_machines_running = 1
 
 [[vm]]
   memory = "1gb"
   cpu_kind = "shared"
   cpus = 1
-
-[checks]
-  [checks.health]
-    type = "http"
-    port = 8080
-    path = "/"
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "60s"
