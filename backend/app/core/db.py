@@ -64,7 +64,9 @@ def get_mongo_client(
             
             client = MongoClient(
                 settings.MONGODB_URI,
+                tls=True,
                 tlsCAFile=certifi.where(),
+                tlsAllowInvalidCertificates=False,
                 serverSelectionTimeoutMS=30000,  # 30 second timeout
                 connectTimeoutMS=20000,          # 20 second connect timeout
                 socketTimeoutMS=20000,           # 20 second socket timeout
