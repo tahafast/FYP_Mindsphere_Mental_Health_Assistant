@@ -10,7 +10,11 @@ import "@/styles/breathing.css";
 
 const USER_ID = "user123";
 
-export function QuickSnapshots() {
+interface QuickSnapshotsProps {
+    refreshKey?: number;
+}
+
+export function QuickSnapshots({ refreshKey }: QuickSnapshotsProps) {
     const [todaysMood, setTodaysMood] = useState<TodaysMood | null>(null);
     const [showBreathingModal, setShowBreathingModal] = useState(false);
     const [showJournalModal, setShowJournalModal] = useState(false);
@@ -18,7 +22,7 @@ export function QuickSnapshots() {
 
     useEffect(() => {
         fetchTodaysMood();
-    }, []);
+    }, [refreshKey]);
 
     const fetchTodaysMood = async () => {
         const mood = await getTodaysMood(USER_ID);

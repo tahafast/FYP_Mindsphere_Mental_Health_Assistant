@@ -12,6 +12,12 @@ import { getTodayISO, isFutureDate } from "@/hooks/useJournal";
 const Overview = () => {
     const [showJournalModal, setShowJournalModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
+    const [moodRefreshKey, setMoodRefreshKey] = useState(0);
+
+    // Callback to refresh mood data immediately after logging
+    const handleMoodLogged = useCallback(() => {
+        setMoodRefreshKey(prev => prev + 1);
+    }, []);
 
     // Handle calendar day click
     const handleDayClick = useCallback((dateIso: string, hasEntry: boolean) => {
@@ -49,10 +55,10 @@ const Overview = () => {
     return (
         <div className="space-y-6 pb-8">
             {/* 1. Hero Greeting Card */}
-            <HeroGreeting />
+            <HeroGreeting onMoodLogged={handleMoodLogged} />
 
             {/* 2. Quick Snapshot Cards */}
-            <QuickSnapshots />
+            <QuickSnapshots refreshKey={moodRefreshKey} />
 
             {/* 2.5. Journal Calendar Widget */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

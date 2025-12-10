@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, AlertTriangle, Menu, Brain, SquarePen, Phone, Activity } from "lucide-react";
@@ -22,6 +23,7 @@ interface CrisisData {
 }
 
 const Chat = () => {
+  const [searchParams] = useSearchParams();
   const [activeSessionId, setActiveSessionId] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,6 +31,7 @@ const Chat = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [showCrisisAlert, setShowCrisisAlert] = useState(false);
   const [crisisData, setCrisisData] = useState<CrisisData | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const USER_ID = "user123"; // Hardcoded for now
@@ -41,25 +44,44 @@ const Chat = () => {
     scrollToBottom();
   }, [messages, isThinking]);
 
-  // Auto-init session if none exists
+  // Load session from URL params OR show empty state (no auto-creation!)
   useEffect(() => {
-    const initSession = async () => {
-      if (!activeSessionId) {
+    const loadSessionFromUrl = async () => {
+      const sessionId = searchParams.get("session");
+
+      if (sessionId) {
+        // Resume existing session from URL
+        setActiveSessionId(sessionId);
         try {
-          const newSession = await createChatSession(USER_ID);
-          setActiveSessionId(newSession.id);
-          // Refresh sidebar
-          queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
-        } catch (error) {
-          console.error("Failed to create initial session", error);
+          const history = await getChatMessages(sessionId);
+          setMessages(history.length > 0 ? history : []);
+        } catch (e) {
+          console.error("Failed to load chat history", e);
         }
       }
+      // If no session param, show empty state - DO NOT auto-create!
+      setIsInitialized(true);
     };
-    initSession();
-  }, [activeSessionId, queryClient]);
+
+    loadSessionFromUrl();
+  }, [searchParams]);
 
   const handleSend = async () => {
-    if (!input.trim() || isThinking || !activeSessionId) return;
+    if (!input.trim() || isThinking) return;
+
+    // Create session on-demand if none exists (lazy initialization)
+    let sessionId = activeSessionId;
+    if (!sessionId) {
+      try {
+        const newSession = await createChatSession(USER_ID);
+        sessionId = newSession.id;
+        setActiveSessionId(sessionId);
+        queryClient.invalidateQueries({ queryKey: ['chatSessions'] });
+      } catch (error) {
+        toast.error("Failed to create chat session");
+        return;
+      }
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -78,7 +100,7 @@ const Chat = () => {
 
     try {
       // Pass user_id and session_id
-      const response = await sendMessage(input, USER_ID, activeSessionId);
+      const response = await sendMessage(input, USER_ID, sessionId);
 
       // If it was the first message, refresh the sidebar after a short delay to show the new title
       if (isFirstMessage) {

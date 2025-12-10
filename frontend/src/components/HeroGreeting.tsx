@@ -7,7 +7,11 @@ import { toast } from "sonner";
 
 const USER_ID = "user123"; // Hardcoded for prototype
 
-export function HeroGreeting() {
+interface HeroGreetingProps {
+    onMoodLogged?: () => void;
+}
+
+export function HeroGreeting({ onMoodLogged }: HeroGreetingProps) {
     const [lastSessionId, setLastSessionId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -62,6 +66,8 @@ export function HeroGreeting() {
                 description: "Mood saved locally unless you opt in.",
                 duration: 4000,
             });
+            // Trigger immediate refresh of mood in parent components
+            onMoodLogged?.();
         } catch (error) {
             toast.error("Failed to log mood");
         }
