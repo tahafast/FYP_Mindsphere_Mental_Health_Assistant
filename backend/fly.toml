@@ -1,39 +1,31 @@
 app = "mindsphere-mental-health-assistant"
 primary_region = "sin"
+kill_signal = "SIGINT"
+kill_timeout = "5s"
 
 [build]
 
 [env]
   PORT = "8080"
 
-[[services]]
+[http_service]
   internal_port = 8080
-  protocol = "tcp"
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
 
-  [[services.ports]]
-    port = 80
-    handlers = ["http"]
-
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-
-  [services.concurrency]
+  [http_service.concurrency]
     type = "requests"
     soft_limit = 50
     hard_limit = 100
 
-# Disable autoscaling + ensure a SINGLE VM because free tier cannot run 2
-[deploy]
-  strategy = "immediate"
-
-[machines]
-  auto_start = true
-  auto_stop = true
-  min_machines_running = 1
-  max_machines_running = 1
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "120s"
+    path = "/"
 
 [[vm]]
-  memory = "1gb"
-  cpu_kind = "shared"
-  cpus = 1
+  size = "shared-cpu-2x"
+  memory = "2gb"
