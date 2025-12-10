@@ -1,110 +1,89 @@
-# 🚀 MindSphere Backend - Fly.io Deployment Guide
+# MindSphere Backend Deployment Guide
 
-## Prerequisites
-1. Install Fly CLI: https://fly.io/docs/hands-on/install-flyctl/
-2. Login to Fly.io: `flyctl auth login`
+## Fly.io Deployment
 
-## Deployment Steps
+### Prerequisites
+- [flyctl CLI](https://fly.io/docs/hands-on/install-flyctl/) installed
+- Fly.io account configured
 
-### 1️⃣ First-Time Setup
+### Environment Secrets
+
+Set the required secrets on Fly.io:
+
+```bash
+# MongoDB connection (required)
+flyctl secrets set MONGODB_URI="mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority" --app mindsphere-mental-health-assistant
+
+# OpenAI API Key (required)
+flyctl secrets set OPENAI_API_KEY="sk-your-openai-api-key" --app mindsphere-mental-health-assistant
+
+# Database name (optional, defaults to 'mindsphere')
+flyctl secrets set MONGODB_DB_NAME="mental_health_db" --app mindsphere-mental-health-assistant
+```
+
+### Deploy
+
 ```bash
 cd backend
-
-# Launch your app (this will create/update fly.toml)
-flyctl launch --copy-config --now
-
-# Set your environment variables (from .env file)
-flyctl secrets set OPENAI_API_KEY=your_key_here
-flyctl secrets set MONGODB_URL=your_mongodb_connection_string
-flyctl secrets set SECRET_KEY=your_secret_key
-
-# Add any other secrets from your .env file:
-# flyctl secrets set VARIABLE_NAME=value
+flyctl deploy --ha=false
 ```
 
-### 2️⃣ Deploy Updates
-```bash
-# Deploy your app
-flyctl deploy
+### Restart Application
 
-# Check deployment status
-flyctl status
-
-# View logs
-flyctl logs
-```
-
-### 3️⃣ Verify Deployment
-```bash
-# Open your app in browser
-flyctl open
-
-# OR visit:
-# https://mindsphere-backend.fly.dev
-```
-
-## Essential Commands
-
-### Monitoring
-```bash
-# Real-time logs
-flyctl logs -f
-
-# SSH into your app
-flyctl ssh console
-
-# Check app info
-flyctl info
-```
-
-### Scaling
-```bash
-# Scale machines
-flyctl scale count 2
-
-# Scale VM resources
-flyctl scale vm shared-cpu-1x --memory 512
-```
-
-### Troubleshooting
-```bash
-# Restart your app
-flyctl apps restart
-
-# Check health
-flyctl checks list
-
-# View deployment history
-flyctl releases
-```
-
-## Production Checklist
-
-- [ ] Set all environment variables via `flyctl secrets set`
-- [ ] Update CORS origins in `main.py` (line 42) to your frontend domain
-- [ ] Configure MongoDB Atlas IP whitelist to allow Fly.io IPs
-- [ ] Test all endpoints after deployment
-- [ ] Set up custom domain (optional): `flyctl certs add yourdomain.com`
-- [ ] Enable auto-scaling if needed
-- [ ] Set up monitoring/alerts
-
-## Environment Variables Required
+If you need to restart the application:
 
 ```bash
-flyctl secrets set OPENAI_API_KEY=sk-...
-flyctl secrets set MONGODB_URL=mongodb+srv://...
-flyctl secrets set SECRET_KEY=your-secret-key
-flyctl secrets set PROJECT_NAME="MindSphere API"
-# Add any other vars from your .env
+flyctl apps restart mindsphere-mental-health-assistant --strategy immediate
 ```
 
-## Notes
+### Check Logs
 
-- Your app will be available at: `https://mindsphere-backend.fly.dev`
-- Logs are critical for debugging - use `flyctl logs -f` frequently
-- First deployment may take 5-10 minutes (downloading dependencies)
-- Subsequent deploys are faster (~2-3 minutes)
+```bash
+flyctl logs --app mindsphere-mental-health-assistant
+```
 
-## Support
-- Fly.io Docs: https://fly.io/docs/
-- Community Forum: https://community.fly.io/
+### Check Status
+
+```bash
+flyctl status --app mindsphere-mental-health-assistant
+```
+
+## MongoDB Atlas Configuration
+
+### Required Settings
+1. **Network Access**: Ensure your MongoDB Atlas cluster allows connections from `0.0.0.0/0` (or Fly.io's IP ranges)
+2. **Database User**: Create a database user with read/write permissions
+3. **Connection String**: Use the SRV connection string format
+
+### Troubleshooting Connection Issues
+
+If MongoDB connection fails:
+
+1. **Check secrets are set**:
+   ```bash
+   flyctl secrets list --app mindsphere-mental-health-assistant
+   ```
+
+2. **Verify connection string format**:
+   - Must start with `mongodb+srv://`
+   - Special characters in password must be URL-encoded
+
+3. **Check Atlas network access**:
+   - Add `0.0.0.0/0` to IP whitelist for Fly.io compatibility
+
+4. **View detailed logs**:
+   ```bash
+   flyctl logs --app mindsphere-mental-health-assistant --no-tail
+   ```
+
+## Health Checks
+
+The API provides these health endpoints:
+
+- `GET /` - Basic health check
+- `GET /health` - Detailed health status
+
+Expected response:
+```json
+{"status": "ok", "message": "MindSphere API is running"}
+```

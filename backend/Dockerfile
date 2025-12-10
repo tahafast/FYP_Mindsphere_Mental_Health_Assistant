@@ -8,8 +8,10 @@ ENV PYTHONUNBUFFERED=1
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (for uvicorn, numpy, etc.)
+# Install system dependencies (for uvicorn, numpy, MongoDB TLS, etc.)
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl-dev \
     build-essential \
     curl \
     libpq-dev \

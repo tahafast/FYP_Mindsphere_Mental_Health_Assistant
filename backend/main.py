@@ -68,7 +68,17 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    """Health check endpoint with MongoDB status."""
+    try:
+        from app.core.db import check_mongo_health
+        mongo_health = check_mongo_health()
+        return {
+            "status": "healthy" if mongo_health["status"] == "healthy" else "degraded",
+            "mongodb": mongo_health
+        }
+    except Exception as e:
+        logger.warning(f"Health check - MongoDB not checked: {e}")
+        return {"status": "healthy", "mongodb": "not_checked"}
 
 # Import and include routers
 try:
@@ -90,4 +100,4 @@ except Exception as e:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=False)
