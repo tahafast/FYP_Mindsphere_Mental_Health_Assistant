@@ -335,5 +335,39 @@ Dr. MindSphere:
         return response
 
 
-# Global instance
-rag_service = RAGService()
+
+# Global instance - lazy initialization to avoid startup blocking
+_rag_service: Optional[RAGService] = None
+
+
+def get_rag_service() -> RAGService:
+    """
+    Get or create the RAGService singleton.
+    
+    Uses lazy initialization to avoid blocking app startup.
+    The MongoDB and OpenAI connections are only established
+    when this function is first called.
+    """
+    global _rag_service
+    
+    if _rag_service is None:
+        try:
+            logger.info("🔧 Initializing RAGService (lazy)...")
+            _rag_service = RAGService()
+            logger.info("✅ RAGService initialized successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize RAGService: {e}")
+            raise
+    
+    return _rag_service
+
+
+# Backward compatibility alias - will trigger lazy init on first access
+class _LazyRAGService:
+    """Lazy wrapper for backward compatibility."""
+    
+    def __getattr__(self, name):
+        return getattr(get_rag_service(), name)
+
+
+rag_service = _LazyRAGService()
