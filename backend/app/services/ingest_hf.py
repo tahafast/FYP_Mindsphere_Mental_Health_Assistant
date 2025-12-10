@@ -20,7 +20,7 @@ if not load_dotenv():
 MONGO_URI = os.getenv("MONGODB_URI")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DB_NAME = os.getenv("MONGODB_DB_NAME", "mindsphere")
-COLLECTION_NAME = "vectors"
+COLLECTION_NAME = "knowledge_base"
 INDEX_NAME = "default"
 
 def pre_flight_check():

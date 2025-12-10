@@ -34,7 +34,7 @@ class IngestionService:
 
         if settings.MONGODB_URI:
             self.client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
-            self.collection = self.client[settings.MONGODB_DB_NAME]["vectors"] # Ensure DB name is correct in settings or hardcoded
+            self.collection = self.client[settings.MONGODB_DB_NAME]["knowledge_base"]
         else:
             self.client = None
             self.collection = None
