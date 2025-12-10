@@ -17,15 +17,16 @@ kill_timeout = "5s"
 
   [http_service.concurrency]
     type = "requests"
-    soft_limit = 50
-    hard_limit = 100
+    soft_limit = 25
+    hard_limit = 50
 
   [[http_service.checks]]
     interval = "30s"
     timeout = "10s"
-    grace_period = "120s"
+    grace_period = "60s"
     path = "/"
 
 [[vm]]
-  size = "shared-cpu-2x"
   memory = "2gb"
+  cpu_kind = "shared"
+  cpus = 2

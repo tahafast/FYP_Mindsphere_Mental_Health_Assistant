@@ -1,25 +1,41 @@
+# Core FastAPI
 fastapi>=0.109.0
 uvicorn>=0.27.0
 pydantic>=2.6.0
 pydantic-settings>=2.1.0
 python-dotenv>=1.0.1
+
+# Database
+pymongo>=4.6.1
+motor>=3.3.2
+
+# LangChain
 langchain
 langchain-openai
 langchain-community
 langchain-mongodb
-pymongo>=4.6.1
-motor>=3.3.2
+
+# AI/ML
 openai>=1.10.0
+transformers
+sentence-transformers
+vaderSentiment
+
+# CPU-only PyTorch (CRITICAL: reduces image from 3.5GB to ~1GB)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+
+# Document Processing
 python-multipart>=0.0.6
 pypdf>=4.0.1
 tiktoken>=0.5.2
 pymupdf4llm
 pymupdf-layout
-datasets
+
+# Retrieval
 flashrank
 rank_bm25
-vaderSentiment
-transformers
-torch
-sentence-transformers
+datasets
+
+# Security
 certifi
