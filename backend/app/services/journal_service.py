@@ -79,7 +79,7 @@ class JournalService:
             self.client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
             self.db = self.client[settings.MONGODB_DB_NAME]
             self.journals_collection = self.db["journals"]
-            self.vectors_collection = self.db["knowledge_base"]
+            self.vectors_collection = self.db["vectors"]
             self.safety_logs_collection = self.db["safety_logs"]
             self.personalization_collection = self.db["user_personalization"]
             self.sentiment_collection = self.db["user_sentiment_metrics"]

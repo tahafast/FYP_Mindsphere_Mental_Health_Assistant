@@ -57,7 +57,7 @@ class RAGService:
             model="text-embedding-3-small"
         )
         self.client = MongoClient(settings.MONGODB_URI, tlsCAFile=certifi.where())
-        self.collection = self.client[settings.MONGODB_DB_NAME]["knowledge_base"]
+        self.collection = self.client[settings.MONGODB_DB_NAME]["vectors"]
         
         # 1. Vector Retriever (Dense)
         self.vector_store = MongoDBAtlasVectorSearch(
