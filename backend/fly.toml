@@ -1,39 +1,23 @@
-app = "mindsphere-mental-health-assistant"
-primary_region = "sin"
+# fly.toml app configuration file generated for mindsphere-mental-health-assistant on 2025-12-10T10:39:34Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'mindsphere-mental-health-assistant'
+primary_region = 'sin'
 
 [build]
 
-[env]
-  PORT = "8080"
-
-[[services]]
+[http_service]
   internal_port = 8080
-  protocol = "tcp"
-
-  [[services.ports]]
-    port = 80
-    handlers = ["http"]
-
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-
-  [services.concurrency]
-    type = "requests"
-    soft_limit = 50
-    hard_limit = 100
-
-# Disable autoscaling + ensure a SINGLE VM because free tier cannot run 2
-[deploy]
-  strategy = "immediate"
-
-[machines]
-  auto_start = true
-  auto_stop = true
-  min_machines_running = 1
-  max_machines_running = 1
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
-  memory = "1gb"
-  cpu_kind = "shared"
+  memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 1024
