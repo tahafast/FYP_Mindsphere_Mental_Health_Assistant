@@ -80,88 +80,108 @@
 
 | Feature | Description |
 |---------|-------------|
-| **🚨 First Responder Protocol** | Semantic crisis detection using Sentence Transformers (not regex-only) triggers immediate safety interventions |
+| **🚨 First Responder Protocol** | Safety transformer for crisis interpretation with intent + method detection, crisis escalation routing |
 | **📈 LEAS (Longitudinal Emotional Alignment Score)** | Continuous sentiment tracking via RoBERTa with sigmoid smoothing for clinical visualization |
 | **🧠 Hybrid RAG Pipeline** | BM25 + Dense Retrieval → Ensemble → FlashRank Reranking → GPT-4o generation |
 | **🌬️ Biometric Breathing Engine** | WebAudio-powered guided exercises with accessibility-first design |
-| **🎭 Dynamic Persona Switching** | Tone adapts (Directive / Empathetic / Motivational) based on detected emotional state |
+| **🎭 Dynamic Persona Switching** | Tone adapts (Friend / Supportive / Therapist) based on user preference and emotional state |
+| **📓 Journaling Engine** | Daily reflection logging with LEAS-based emotional depth interpretation and long-term insight extraction |
+| **💡 Recommendation Engine** | Personalized coping strategies, routine building, and situation-specific well-being suggestions |
+| **⚙️ Personalization Upgrade** | Adaptive persona adjustment with emotion-intensity-aware suggestion tuning |
 
 ---
 
 ## 🏗️ System Architecture
 
 ```mermaid
-flowchart TB
-    subgraph Frontend["🖥️ FRONTEND (React + Vite + TypeScript)"]
+flowchart LR
+    %% BACKEND CORE
+    subgraph Backend["Backend (FastAPI + Services)"]
         direction TB
-        subgraph UI["User Interface Components"]
-            ChatUI["💬 Chat UI<br/>ChatPage, Sidebar, Messages"]
-            Dashboard["📊 Dashboard<br/>LEAS Graph, Overview, Insights"]
-            Breathing["🌬️ Breathing Modal<br/>Bubble, HUD, Controls"]
-            SafetyUI["🚨 Safety Alert UI<br/>Crisis Overlay, Emergency Contacts"]
-        end
-        API["📡 API Layer (api.ts)"]
-        UI --> API
+
+        %% INPUT PIPELINE
+        A[User Input Processing<br>• Emotion & Intensity Detection<br>• LEAS Depth Scoring]
+
+        B[Sentiment & Intent Classification<br>• Fine-tuned RoBERTa<br>• Intent Type Extraction]
+
+        C[Contextual Retrieval RAG<br>• LangChain<br>• Persona-Aligned Context]
+
+        D[Dynamic Response Generation<br>• GPT-4o / GPT-5<br>• Adaptive Tone Logic]
+
+        E[Safety & First Responder Protocol<br>• Crisis Intent Detection<br>• Method Recognition<br>• Escalation Routing]
+
+        F[Journaling Engine<br>• Daily Logs<br>• LEAS Insights<br>• Long-Term Patterns]
+
+        G[Recommendation Engine<br>• Coping Strategies<br>• Behavioral Suggestions<br>• Personalized Routines]
+
+        A --> B --> C --> D
+        B --> E
+        A --> F
+        A --> G
+        F --> G
     end
 
-    subgraph Backend["⚡ FASTAPI BACKEND"]
+    %% DATABASE LAYER
+    subgraph DB["MongoDB Atlas (Data Layer)"]
         direction TB
-        subgraph Endpoints["API Endpoints"]
-            ChatEndpoint["/chat<br/>Crisis Detection"]
-            SessionsEndpoint["/sessions<br/>CRUD + Auto-Title"]
-            MoodsEndpoint["/moods<br/>Log/Fetch Mood Data"]
-            BreathingEndpoint["/breathing<br/>Start/Stop, Presets"]
-        end
-        
-        subgraph Services["🧠 Service Layer"]
-            SafetyGuard["🛡️ SafetyGuard<br/>━━━━━━━━━━━━━<br/>SentenceTransformers<br/>all-MiniLM-L6-v2<br/>Prototype Clustering<br/>(0.72 threshold)"]
-            SentimentSvc["📈 SentimentService<br/>━━━━━━━━━━━━━<br/>J-Hartmann RoBERTa<br/>Sigmoid Smoothing<br/>Emotion→LEAS Mapping"]
-            RAGService["🤖 RAGService<br/>━━━━━━━━━━━━━<br/>MongoDB Atlas VectorSearch<br/>BM25 + Dense Ensemble<br/>FlashRank Reranker<br/>GPT-4o-mini"]
-        end
-        
-        Endpoints --> Services
+        DB1[(user_sessions)]
+        DB2[(chat_history)]
+        DB3[(journal_logs)]
+        DB4[(leas_scores)]
+        DB5[(safety_events)]
     end
 
-    subgraph Database["🗄️ MONGODB ATLAS"]
-        direction LR
-        Vectors[("📚 vectors<br/>knnVector Index<br/>(cosine similarity)")]
-        Sessions[("💾 chat_sessions<br/>session_id, title<br/>user_id")]
-        Sentiment[("📊 user_sentiment<br/>_metrics<br/>LEAS scores")]
-        MoodLogs[("😊 mood_logs<br/>Manual check-ins")]
+    Backend --> DB
+
+    %% FRONTEND LAYER
+    subgraph Frontend["React + Vite Frontend"]
+        direction TB
+
+        UI1[Chat UI<br>Adaptive Messages]
+        UI2[Dashboard<br>LEAS Graphs & Insights]
+        UI3[Journaling UI<br>Daily Logs, Reflections]
+        UI4[Breathing Exercise Module<br>Real-time Visualizer]
+        UI5[Safety Alert Sheet<br>Crisis Guidelines]
+
     end
 
-    API -->|"HTTP/JSON"| Backend
-    Services --> Database
-    
-    SafetyGuard -->|"Crisis Detected"| SafetyUI
-    SentimentSvc -->|"LEAS Score"| Dashboard
-    RAGService -->|"GPT Response"| ChatUI
-
-    style Frontend fill:#1a1a2e,stroke:#4ade80,stroke-width:2px
-    style Backend fill:#16213e,stroke:#60a5fa,stroke-width:2px
-    style Database fill:#0f3460,stroke:#f472b6,stroke-width:2px
-    style SafetyGuard fill:#7f1d1d,stroke:#ef4444,stroke-width:2px
-    style SentimentSvc fill:#1e3a5f,stroke:#3b82f6,stroke-width:2px
-    style RAGService fill:#14532d,stroke:#22c55e,stroke-width:2px
+    UI1 -->|User Message| A
+    E --> UI5
+    F --> UI3
+    G --> UI1
+    F --> UI2
+    DB4 --> UI2
 ```
 
 ### Architecture Overview
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Frontend** | React 18 + Vite + TypeScript | Modern SPA with real-time chat, LEAS visualization, and breathing exercises |
+| **Frontend** | React 18 + Vite + TypeScript | Modern SPA with real-time chat, LEAS visualization, journaling, and breathing exercises |
 | **API Layer** | FastAPI (Python 3.10+) | High-performance async API with automatic OpenAPI documentation |
-| **Safety Layer** | Sentence Transformers | Semantic crisis detection with 0.72 cosine similarity threshold |
+| **Safety Layer** | Sentence Transformers + Intent Classifier | Semantic crisis detection with intent + method recognition and escalation routing |
 | **Sentiment Engine** | J-Hartmann RoBERTa | 7-emotion classification with confidence-aware LEAS mapping |
 | **RAG Pipeline** | LangChain + FlashRank | Hybrid BM25/Dense retrieval with cross-encoder reranking |
-| **LLM** | GPT-4o-mini | Empathetic response generation with dynamic persona switching |
-| **Database** | MongoDB Atlas | Vector store, session management, and longitudinal analytics |
+| **LLM** | GPT-4o / GPT-5 | Empathetic response generation with adaptive persona switching |
+| **Journaling Engine** | LEAS + MongoDB | Daily reflection logging with emotional depth interpretation and insight extraction |
+| **Recommendation Engine** | Pattern Analysis + LLM | Personalized coping strategies, routine building, and situation-specific suggestions |
+| **Personalization** | Adaptive Tone System | Friend / Supportive / Therapist tone preferences with emotion-intensity tuning |
+| **Database** | MongoDB Atlas | Vector store, session management, journals, safety events, and longitudinal analytics |
 
 ---
 
 ## 🔐 Safety Layer & First Responder Protocol
 
 The Safety Layer is the **highest-priority subsystem** in MindSphere. It intercepts every user message *before* any other processing occurs.
+
+### First Responder Protocol Capabilities
+
+| Capability | Description |
+|------------|-------------|
+| **Safety Transformer** | Crisis interpretation using fine-tuned transformer models |
+| **Intent Detection** | Identifies self-harm, suicidal ideation, and medical emergency intents |
+| **Method Recognition** | Detects mentioned methods when self-harm risk is present |
+| **Escalation Routing** | Routes high-risk cases to appropriate crisis response pathways |
 
 ### Hybrid Detection Strategy
 
@@ -267,6 +287,122 @@ All crisis events are logged to MongoDB with:
 - Sentiment score (-1.0 for crisis)
 - Emotion label ("crisis")
 - Input preview (first 100 chars)
+- Detected intent type
+- Method indicators (if any)
+- Escalation status
+
+---
+
+## 📓 Journaling Engine
+
+The Journaling Engine provides a structured reflection system integrated with emotional analytics.
+
+### Core Features
+
+| Feature | Description |
+|---------|-------------|
+| **Daily Reflection Logging** | Structured daily journal entries with timestamp and mood tracking |
+| **LEAS-Based Interpretation** | Automatic emotional depth scoring using the Longitudinal Emotional Alignment Score |
+| **Long-Term Insight Extraction** | Pattern detection across journal entries for personalized insights |
+| **Context-Aware Guidance** | Retrieval of past entries to inform AI responses and recommendations |
+
+### Journal Entry Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                      JOURNALING PIPELINE                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   User Reflection                                                   │
+│        │                                                            │
+│        ▼                                                            │
+│   ┌────────────────────────────────────────┐                        │
+│   │      TEXT ANALYSIS                      │                       │
+│   │                                         │                       │
+│   │   • Sentiment extraction (RoBERTa)     │                        │
+│   │   • Emotional depth scoring (LEAS)     │                        │
+│   │   • Theme identification               │                        │
+│   └────────────────┬───────────────────────┘                        │
+│                    │                                                │
+│                    ▼                                                │
+│   ┌────────────────────────────────────────┐                        │
+│   │      PATTERN RECOGNITION                │                       │
+│   │                                         │                       │
+│   │   • Cross-entry theme analysis         │                        │
+│   │   • Emotional trend detection          │                        │
+│   │   • Trigger identification             │                        │
+│   └────────────────┬───────────────────────┘                        │
+│                    │                                                │
+│                    ▼                                                │
+│   ┌────────────────────────────────────────┐                        │
+│   │      INSIGHT GENERATION                 │                       │
+│   │                                         │                       │
+│   │   • Personalized feedback              │                        │
+│   │   • Recommendation triggers            │                        │
+│   │   • Long-term wellness tracking        │                        │
+│   └────────────────────────────────────────┘                        │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 💡 Recommendation Engine
+
+The Recommendation Engine delivers personalized well-being suggestions based on user state and patterns.
+
+### Recommendation Categories
+
+| Category | Description |
+|----------|-------------|
+| **Coping Strategies** | Immediate techniques for managing current emotional states |
+| **Routine Building** | Daily habit suggestions for long-term mental wellness |
+| **Situation-Specific Suggestions** | Contextual advice based on detected triggers or events |
+
+### Personalization Factors
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                 RECOMMENDATION PERSONALIZATION                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Input Signals:                                                    │
+│   ┌───────────────────────────────────────────────────────────────┐ │
+│   │                                                               │ │
+│   │   📊 Current Emotion    →  Immediate coping selection         │ │
+│   │   📈 LEAS Score         →  Intensity-appropriate suggestions  │ │
+│   │   📓 Journal Themes     →  Pattern-aware recommendations      │ │
+│   │   🕐 User Patterns      →  Timing-optimized delivery          │ │
+│   │   ⚙️ Tone Preference    →  Communication style matching       │ │
+│   │                                                               │ │
+│   └───────────────────────────────────────────────────────────────┘ │
+│                                                                     │
+│   Output: Ranked, personalized well-being suggestions               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚙️ Personalization System
+
+MindSphere adapts its communication style to match user preferences and emotional context.
+
+### Tone Preferences
+
+| Tone | Style | Best For |
+|------|-------|----------|
+| **Friend** | Casual, warm, conversational | Users wanting peer-like support |
+| **Supportive** | Balanced, encouraging, gentle | Default mode for most users |
+| **Therapist** | Professional, structured, clinical | Users preferring formal guidance |
+
+### Adaptive Features
+
+| Feature | Description |
+|---------|-------------|
+| **Tone Preference Setting** | User-configurable communication style |
+| **Adaptive Persona Adjustment** | Dynamic tone shifts based on detected emotional intensity |
+| **Emotion-Intensity-Aware Tuning** | Suggestion depth and directness scaled to user state |
 
 ---
 
@@ -997,6 +1133,10 @@ MONGODB_DB_NAME=mindsphere
    - `mood_logs`
    - `breathing_sessions`
    - `breathing_presets`
+   - `journal_logs`
+   - `leas_scores`
+   - `safety_events`
+   - `user_preferences`
 4. Create an Atlas Search Index on `vectors`:
 
 ```json
@@ -1076,10 +1216,15 @@ mindsphere/
 │   │   │   ├── mood_log.py
 │   │   │   └── session.py
 │   │   └── services/
+│   │       ├── generation_orchestrator.py
 │   │       ├── ingestion.py
 │   │       ├── ingest_hf.py
+│   │       ├── journal_service.py
+│   │       ├── persona_examples.py
 │   │       ├── rag.py
+│   │       ├── recommendation_service.py
 │   │       ├── safety_guard.py
+│   │       ├── safety_service.py
 │   │       └── sentiment.py
 │   ├── main.py
 │   └── requirements.txt
@@ -1087,6 +1232,8 @@ mindsphere/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── breathing/
+│   │   │   ├── chat/
+│   │   │   ├── journal/
 │   │   │   └── ui/
 │   │   ├── hooks/
 │   │   ├── lib/
