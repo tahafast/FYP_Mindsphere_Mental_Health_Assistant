@@ -89,19 +89,31 @@ async def create_or_update_journal(
     if journals_collection is None:
         raise HTTPException(status_code=503, detail="Database unavailable")
     
-    # Determine the date
+    # Determine the date - use client's local date if provided
     date_iso = request.local_date or get_today_iso()
-    today = get_today_iso()
     
     # Validate: Cannot create journal for future dates
-    if date_iso > today:
-        raise HTTPException(
-            status_code=400, 
-            detail="You cannot create a journal entry for a future date. Select today or a past date."
-        )
+    # Since clients are in different timezones (UTC-12 to UTC+14), we need to be lenient:
+    # Accept any date that's not more than 1 day ahead of UTC (accounts for UTC+14 timezone)
+    from datetime import date
+    try:
+        requested_date = datetime.strptime(date_iso, "%Y-%m-%d").date()
+        # Max allowed date is tomorrow in UTC (to accommodate UTC+14 timezones)
+        max_allowed_date = datetime.utcnow().date() + timedelta(days=1)
+        if requested_date > max_allowed_date:
+            raise HTTPException(
+                status_code=400, 
+                detail="You cannot create a journal entry for a future date. Select today or a past date."
+            )
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Expected YYYY-MM-DD.")
     
-    # Enforce one-per-day rule: only allow create/update for today
-    if date_iso != today:
+    # Enforce one-per-day rule: only allow create/update for today (client's local today)
+    # We accept if the date is "today" in the client's timezone, which could be:
+    # - Today in UTC, or
+    # - Tomorrow in UTC (for clients in UTC+ timezones like UTC+5 to UTC+14)
+    today_utc = datetime.utcnow().date()
+    if requested_date < today_utc - timedelta(days=1):
         raise HTTPException(
             status_code=400, 
             detail="Can only create or edit today's journal entry. Past entries are view-only."

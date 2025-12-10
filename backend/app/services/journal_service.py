@@ -200,7 +200,7 @@ class JournalService:
             logger.warning(f"LLM crisis detected ({crisis.level}) for user {user_id}: {crisis.reason}")
             
             # Log to safety_logs
-            if self.safety_logs_collection:
+            if self.safety_logs_collection is not None:
                 self.safety_logs_collection.insert_one({
                     "user_id": user_id,
                     "timestamp": datetime.utcnow(),

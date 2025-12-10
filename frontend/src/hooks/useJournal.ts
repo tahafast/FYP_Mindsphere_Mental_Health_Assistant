@@ -75,10 +75,20 @@ function isDateToday(dateIso: string): boolean {
     return dateIso === getTodayISO();
 }
 
+// Helper to normalize a date string to start-of-day (local timezone)
+function normalizeDate(dateIso: string): Date {
+    const parts = dateIso.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
+    const day = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+}
+
 // Helper to check if a date is in the future
 function isFutureDate(dateIso: string): boolean {
-    const today = getTodayISO();
-    return dateIso > today;
+    const today = normalizeDate(getTodayISO());
+    const selected = normalizeDate(dateIso);
+    return selected > today;
 }
 
 // Format date for display
